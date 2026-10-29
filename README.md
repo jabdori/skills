@@ -7,10 +7,10 @@ Codex용 작업 절차 스킬 12개와 공통 지침입니다. 업무 담당자�
 ## 설치
 
 ```bash
-git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && mkdir -p ~/.agents/skills && cp -R /tmp/s/personal-skills/my-* /tmp/s/personal-skills/_shared ~/.agents/skills/
+git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && mkdir -p ~/.agents/skills && cp -R /tmp/s/personal-skills/* ~/.agents/skills/
 ```
 
-`codex`를 새로 시작한 뒤 "사용 가능한 my- 스킬 이름만 알려줘"로 인식을 확인합니다.
+`codex`를 새로 시작한 뒤 "사용 가능한 스킬에 brief·build·verify가 있는지 알려줘"로 인식을 확인합니다.
 
 ## License
 

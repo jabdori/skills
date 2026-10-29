@@ -4,30 +4,30 @@ Codex에서 쓰는 **12개 스킬**과 [공통 지침](_shared/personal-workflow
 
 | 스킬 | 맡기는 요청 |
 |---|---|
-| [my-research](my-research/SKILL.md) | 근거 조사와 준비 판단 |
-| [my-brief](my-brief/SKILL.md) | 목적·요구·업무 예외의 모호함 해소. 담당자에게 물을 것과 사용자가 정할 것을 구분 |
-| [my-orient](my-orient/SKILL.md) | 과제 환경·기존 코드의 실제 현황 파악과 작업 재개 |
-| [my-plan](my-plan/SKILL.md) | 접근·순서, 요구 근거가 붙은 명세와 작업 단위 |
-| [my-build](my-build/SKILL.md) | 구현·검증, 독립 작업의 병렬 처리와 통합 |
-| [my-verify](my-verify/SKILL.md) | 기술적 동작과 업무 요구 충족을 나눈 검토·판정 |
-| [my-explain](my-explain/SKILL.md) | 결정 설명, 제출 문서, 인계, 사후 질의 대비 정리 |
-| [my-debug](my-debug/SKILL.md) | 원인 불명 오류의 추적·복구 |
-| [my-ux](my-ux/SKILL.md) | 사용자의 이해·조작·완료 문제 개선 |
-| [my-init](my-init/SKILL.md) | 기존 프로젝트의 작업 명령·경계와 `AGENTS.md` 정비 |
-| [my-wait](my-wait/SKILL.md) | 이해가 끊긴 지점에서 멈추고 배경·용어·예시로 재설명 |
-| [my-retro](my-retro/SKILL.md) | 실제 시행착오를 다음 작업의 지침·검증에 반영 |
+| [research](research/SKILL.md) | 근거 조사와 준비 판단 |
+| [brief](brief/SKILL.md) | 목적·요구·업무 예외의 모호함 해소. 담당자에게 물을 것과 사용자가 정할 것을 구분 |
+| [orient](orient/SKILL.md) | 과제 환경·기존 코드의 실제 현황 파악과 작업 재개 |
+| [plan](plan/SKILL.md) | 접근·순서, 요구 근거가 붙은 명세와 작업 단위 |
+| [build](build/SKILL.md) | 구현·검증, 독립 작업의 병렬 처리와 통합 |
+| [verify](verify/SKILL.md) | 기술적 동작과 업무 요구 충족을 나눈 검토·판정 |
+| [explain](explain/SKILL.md) | 결정 설명, 제출 문서, 인계, 사후 질의 대비 정리 |
+| [debug](debug/SKILL.md) | 원인 불명 오류의 추적·복구 |
+| [ux](ux/SKILL.md) | 사용자의 이해·조작·완료 문제 개선 |
+| [init](init/SKILL.md) | 기존 프로젝트의 작업 명령·경계와 `AGENTS.md` 정비 |
+| [wait](wait/SKILL.md) | 이해가 끊긴 지점에서 멈추고 배경·용어·예시로 재설명 |
+| [retro](retro/SKILL.md) | 실제 시행착오를 다음 작업의 지침·검증에 반영 |
 
-자연어로 요청하거나 `$my-build`처럼 역할을 지정합니다. 12개를 순서대로 실행하지 않으며 작은 수정은 해당 작업만 끝냅니다.
+자연어로 요청하거나 `$build`처럼 역할을 지정합니다. 12개를 순서대로 실행하지 않으며 작은 수정은 해당 작업만 끝냅니다.
 
 ## 두는 위치
 
-12개 `my-*` 폴더와 `_shared`를 **같은 스킬 폴더 바로 아래에 함께** 둡니다(`_shared` 상대 링크 유지). Codex는 작업 폴더의 `.agents/skills`와 사용자 폴더의 `~/.agents/skills`에서 스킬을 찾습니다. 작업 폴더를 제출물로 깨끗하게 두려면 `~/.agents/skills`를 씁니다.
+12개 스킬 폴더와 `_shared`를 **같은 스킬 폴더 바로 아래에 함께** 둡니다(`_shared` 상대 링크 유지). Codex는 작업 폴더의 `.agents/skills`와 사용자 폴더의 `~/.agents/skills`에서 스킬을 찾습니다. 작업 폴더를 제출물로 깨끗하게 두려면 `~/.agents/skills`를 씁니다.
 
 ```bash
-mkdir -p ~/.agents/skills && cp -R personal-skills/my-* personal-skills/_shared ~/.agents/skills/
+mkdir -p ~/.agents/skills && cp -R personal-skills/* ~/.agents/skills/
 ```
 
-`codex`를 새로 시작한 뒤 "사용 가능한 my- 스킬 이름만 알려줘"로 인식을 확인합니다.
+`codex`를 새로 시작한 뒤 "사용 가능한 스킬에 brief·build·verify가 있는지 알려줘"로 인식을 확인합니다.
 
 ## 필요한 상황
 
@@ -39,6 +39,6 @@ mkdir -p ~/.agents/skills && cp -R personal-skills/my-* personal-skills/_shared 
 | “합쳐도 되는지 검토해줘” | [검토·PR 양식](_shared/review-and-pr.md) |
 | “주문 완료와 결제 완료는 같은 뜻이야?” | [용어와 의미 지도](_shared/personal-workflow.md#용어와-의미-지도) |
 
-검사 결과는 [공통 판정 기준](_shared/personal-workflow.md#실제-변경과-검사-근거)으로 확인합니다. Python 표준 `unittest`에서 수집 누락·전체 생략을 구분해야 할 때만 [검사 보조](my-verify/scripts/verify_unittest.py)를 씁니다.
+검사 결과는 [공통 판정 기준](_shared/personal-workflow.md#실제-변경과-검사-근거)으로 확인합니다. Python 표준 `unittest`에서 수집 누락·전체 생략을 구분해야 할 때만 [검사 보조](verify/scripts/verify_unittest.py)를 씁니다.
 
 지침은 행동 기준이며 자동 차단 장치는 아닙니다.
