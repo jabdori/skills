@@ -14,6 +14,7 @@ Codex에서 쓰는 **12개 스킬**과 [공통 지침](_shared/personal-workflow
 | [debug](debug/SKILL.md) | 원인 불명 오류의 추적·복구 |
 | [ux](ux/SKILL.md) | 사용자의 이해·조작·완료 문제 개선 |
 | [init](init/SKILL.md) | 기존 프로젝트의 작업 명령·경계와 `AGENTS.md` 정비 |
+| [exam-start](exam-start/SKILL.md) | Cofa 응시 시작 한 번: 시스템 지침 보존·규칙 추가·과제 파악. [rules.md](exam-start/rules.md)가 원본(clone이 막히면 이 내용을 직접 입력) |
 | [wait](wait/SKILL.md) | 이해가 끊긴 지점에서 멈추고 배경·용어·예시로 재설명 |
 | [retro](retro/SKILL.md) | 실제 시행착오를 다음 작업의 지침·검증에 반영 |
 
