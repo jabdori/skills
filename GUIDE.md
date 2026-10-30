@@ -27,7 +27,7 @@ git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && mkdir -p ~/.
 ```
 
 1. 위 명령으로 스킬을 설치합니다. 이 가이드는 `/tmp/s/GUIDE.md`에 같이 내려옵니다.
-2. 터미널에서 `codex` 실행 → 폴더 신뢰는 Enter → `/model`에서 **6.1 Sol**(`gpt-6.1-sol`)을 고릅니다. 권장 모델은 6.1 Sol · 5.6 Terra · 6.0 Luna이고 Astra는 쓰지 않습니다.
+2. 터미널에서 `codex` 실행 → 폴더 신뢰는 Enter → `/model`에서 **6.1 Sol**(`gpt-6.1-sol`)을 고릅니다. 권장 모델은 Sol 6.1 · Terra 5.6 · Luna 6 · Sol 6.0이고 Astra는 쓰지 않습니다(필수 확인사항 브리프).
 3. 첫 요청으로 **`$exam-start`** 를 보냅니다. 스킬이 대신하는 일:
    - 시스템이 미리 넣어 둔 `AGENTS.md`(실제 Probe 화면에서 확인)를 읽고 요약합니다. 지우지 않습니다.
    - 작업 규칙 10줄([부록 A](#부록-a-agentsmd-작업-규칙-10줄))을 덧붙이되 시스템 내용과 겹치는 줄은 뺍니다.
@@ -36,10 +36,13 @@ git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && mkdir -p ~/.
 4. 덧붙은 `AGENTS.md`를 **직접 읽습니다.** 제출물에 포함되고, 서술형에서 "왜 넣었나"를 물을 수 있습니다(리허설에서 실제로 출제됨).
 5. clone이 막히면 `AGENTS.md` 맨 아래에 부록 A의 10줄을 직접 입력합니다. `AGENTS.md` 수정을 막는 규칙은 없습니다(금지는 Codex 설정·감독 설정 변경). 시스템 내용은 읽기 전에 지우지 않습니다.
 
+시험 화면에서 이 요약을 보려면 터미널 새 탭에서 `cat /tmp/s/CHEATSHEET.md`를 실행합니다. 책상에는 허용된 준비물만 둘 수 있어 종이 메모는 두지 않습니다. 작업 폴더에 복사하면 제출물에 섞이니 복사하지 않습니다.
+
 지켜야 할 것:
 - **Codex 업데이트 금지.** "Update available"이 떠도 무시합니다.
 - 공개 저장소 `jabdori/skills`는 **2차 예선 결과 통지 전까지 공개 상태로 유지**해야 합니다(안내 메일 조건).
 - Claude 등 다른 모델 연결, 개인 API 키, Codex·감독 설정 변경, Git push, 외부 전송은 하지 않습니다.
+- 시험 전에 Mac에서 가상화(OrbStack/Docker), 원격·메신저 프로그램, Claude·Orca 같은 다른 AI 도구를 종료합니다(응시 규정).
 
 ---
 
