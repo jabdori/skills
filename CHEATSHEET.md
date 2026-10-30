@@ -4,7 +4,7 @@
 
 ## 시작 (10:00)
 1. `git clone`(설치 한 줄) → `codex` → `/model` Sol 6.1 → `$exam-start`
-2. 덧붙은 AGENTS.md를 직접 읽기 → DMs에서 담당자 수 확인
+2. AGENTS.md를 직접 읽기(없었으면 새로 만들어짐) → DMs에서 담당자 수 확인. Update available·F2 warning은 무시
 3. clone 실패 시: AGENTS.md 맨 아래에 11줄 직접 입력(묻는다·합의·확인·구분·작게·늘리지 않음·push 금지·권장 모델만·0.0.0.0·제출물·설명)
 
 ## 스킬 — 언제
@@ -19,7 +19,7 @@
 | 설명을 모르겠음 | `$wait … 가 무슨 뜻인지 예시로 다시` |
 | 작업을 다시 잡을 때 | `$orient 지금 어디까지 됐고 무엇이 남았는지 정리해줘` |
 | 제출 15분 전 | `$verify 로 근거표 상태를 갱신하고, $explain 으로 DECISIONS.md와 설명카드.md를 실제 코드와 맞게 정리해` |
-| 확정 직전 | `python3 ~/.agents/skills/_shared/scripts/presubmit.py --test "<테스트 명령>"` 실행해 경고 고치기 |
+| 확정 직전 | `스킬 폴더의 _shared/scripts/presubmit.py를 --test "<테스트 명령>"로 실행해 경고를 고쳐` |
 
 ## 담당자 질문 순서
 범위("무엇을 여쭤보면?") → 실제 사례 → 지금 방식 → 구분 기준 → 예외·경계 → **반대 방향** → 만들지 않을 것 → **성공 기준** → 요약 확인

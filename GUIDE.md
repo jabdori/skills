@@ -29,17 +29,19 @@ git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && mkdir -p ~/.
 1. 위 명령으로 스킬을 설치합니다. 이 가이드는 `/tmp/s/GUIDE.md`에 같이 내려옵니다.
 2. 터미널에서 `codex` 실행 → 폴더 신뢰는 Enter → `/model`에서 **6.1 Sol**(`gpt-6.1-sol`)을 고릅니다. 권장 모델은 Sol 6.1 · Terra 5.6 · Luna 6 · Sol 6.0이고 Astra는 쓰지 않습니다(필수 확인사항 브리프).
 3. 첫 요청으로 **`$exam-start`** 를 보냅니다. 스킬이 대신하는 일:
-   - 시스템이 미리 넣어 둔 `AGENTS.md`(실제 Probe 화면에서 확인)를 읽고 요약합니다. 지우지 않습니다.
+   - 작업 폴더에 `AGENTS.md`가 있으면 읽고 요약하고 지우지 않습니다. **없으면 새로 만듭니다.** 10/30 사전 체험에서는 없었고 `$exam-start`가 새로 만들었습니다(작업 폴더는 홈 `~`, `README.md`·`README.en.md`·`uploads/`가 있음).
    - 작업 규칙 11줄([부록 A](#부록-a-agentsmd-작업-규칙-11줄))을 덧붙이되 시스템 내용과 겹치는 줄은 뺍니다.
    - 실제 검사 명령·포트·제출 파일명을 확인해 "이 프로젝트" 구역을 씁니다.
    - 현재 동작과 과제 요구의 차이를 정리하고, 근거표를 시작하고, 담당자별 질문안을 줍니다.
-4. 덧붙은 `AGENTS.md`를 **직접 읽습니다.** 제출물에 포함되고, 서술형에서 "왜 넣었나"를 물을 수 있습니다(리허설에서 실제로 출제됨).
+4. 만들어지거나 덧붙은 `AGENTS.md`를 **직접 읽습니다.** 제출물에 포함되고, 서술형에서 "왜 넣었나"를 물을 수 있습니다(리허설에서 실제로 출제됨).
 5. clone이 막히면 `AGENTS.md` 맨 아래에 부록 A의 11줄을 직접 입력합니다. `AGENTS.md` 수정을 막는 규칙은 없습니다(금지는 Codex 설정·감독 설정 변경). 시스템 내용은 읽기 전에 지우지 않습니다.
 
 시험 화면에서 이 요약을 보려면 터미널 새 탭에서 `cat /tmp/s/CHEATSHEET.md`를 실행합니다. 책상에는 허용된 준비물만 둘 수 있어 종이 메모는 두지 않습니다. 작업 폴더에 복사하면 제출물에 섞이니 복사하지 않습니다.
 
 지켜야 할 것:
-- **Codex 업데이트 금지.** "Update available"이 떠도 무시합니다.
+- **Codex 업데이트 금지.** 사전 체험의 Codex는 0.163.0이었고 "Update available 0.163.0 → 0.166.0"이 떴습니다. 무시합니다. 하단의 "1 warning · f2 to view"는 F2로 내용을 볼 수 있습니다.
+- 스킬 위치: 사전 체험에서는 `~/.codex/skills`에 넣어도 `$exam-start`·`$plan`이 동작했습니다. 이 가이드의 명령은 `~/.agents/skills`에 설치하며, 제출 전 점검 스크립트 경로는 설치한 위치의 `_shared/scripts/presubmit.py`입니다.
+- 사전 체험에서 확인된 환경: Python 3.11, Node 22, Perl, GCC. Java·Go·Rust·Ruby·PHP·.NET·Deno·Bun은 없음. 브라우저 미리보기 외에 Codex가 headless Chromium으로 화면을 확인할 수 있었습니다.
 - 공개 저장소 `jabdori/skills`는 **2차 예선 결과 통지 전까지 공개 상태로 유지**해야 합니다(안내 메일 조건).
 - Claude 등 다른 모델 연결, 개인 API 키, Codex·감독 설정 변경, Git push, 외부 전송은 하지 않습니다.
 - 시험 전에 Mac에서 가상화(OrbStack/Docker), 원격·메신저 프로그램, Claude·Orca 같은 다른 AI 도구를 종료합니다(응시 규정).
@@ -79,14 +81,14 @@ git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && mkdir -p ~/.
 
 | 시점 | 내가 할 일 | Codex 요청 예시 | 쓰는 것 |
 |---|---|---|---|
-| 0~5분 | 신분증·구도 확인 뒤 설치, `codex` 실행 | "$exam-start" → 덧붙은 `AGENTS.md`를 직접 읽기 | 설치 명령, `$exam-start` |
+| 0~5분 | 신분증·구도 확인 뒤 설치, `codex` 실행 | "$exam-start" → `AGENTS.md`를 직접 읽기 | 설치 명령, `$exam-start` |
 | 5~15분 | README·과제 안내에서 목표·필수 제출물·파일명 확인. **DMs에 담당자가 몇 명인지 확인** | (`$exam-start`가 현황·질문안까지 줌. 다시 잡을 때만 `$orient`) | — |
 | 동시에 | 담당자에게 작게 묻기([5장](#5-담당자-대화)) | — | — |
 | 15~40분 | 받은 답을 **번호 매겨 빠짐없이** 전달 | "$brief 담당자 답이야. 근거표에 빠짐없이 기록하고 합의 요약을 만들어줘. (1)… (2)… 내 결정: …" | `$brief`, 근거표 |
 | | 요약을 **담당자에게 확인받고** 결과 전달 | "담당자가 요약이 맞다고 확인했어. 합의 제약을 AGENTS.md에 짧게 반영해" | `$brief` → `AGENTS.md` |
 | 40~60분 | 계획을 읽고 순서·범위를 내가 정함 | "$plan 합의 기준으로 구현 순서와 단계별 위험을 정리해줘" → 고칠 점만 한 줄로 | `$plan` |
 | 60~150분 | 구현을 맡기고 단위별 보고를 담당자 요구와 대조. 어긋나거나 담당자에게 보여 줄 지점에서만 끼어듦 | "$build 계획대로 구현해. 예외 (…)는 실패 테스트로 먼저 확인. 단위마다 바뀐 파일과 테스트 결과만 짧게" | `$build` |
-| 150~165분 | 제출 전 점검 | "$verify 로 요구근거.md 상태를 갱신하고, $explain 으로 DECISIONS.md와 설명카드.md를 템플릿대로 실제 코드와 맞게 정리해" → "python3 ~/.agents/skills/_shared/scripts/presubmit.py --test \"<테스트 명령>\" 실행해서 경고를 고쳐" | `$verify` `$explain` 하네스 |
+| 150~165분 | 제출 전 점검 | "$verify 로 요구근거.md 상태를 갱신하고, $explain 으로 DECISIONS.md와 설명카드.md를 템플릿대로 실제 코드와 맞게 정리해" → "스킬 폴더의 _shared/scripts/presubmit.py를 --test \"<테스트 명령>\"로 실행해서 경고를 고쳐" | `$verify` `$explain` 하네스 |
 | 165~170분 | **설명 카드를 직접 읽기.** 모르는 분기는 코드 위치를 열어 확인 | — | 설명 카드 |
 | 170분 | 저장 상태 확인 → 제출 미리보기(생성물·누락 파일) → 확정 | — | — |
 | 서술형 | AI 없이 5분씩. [8장](#8-서술형-인지-축) | — | — |
@@ -280,7 +282,7 @@ python3 ~/.agents/skills/_shared/scripts/presubmit.py --decisions docs/결정.md
 
 ## 부록 B. 시험 당일 한 장 요약
 
-1. 설치 → `codex` → `/model` 6.1 Sol → `$exam-start` → 덧붙은 `AGENTS.md` 직접 읽기. 업데이트 무시. (clone이 막히면 11줄 직접 입력)
+1. 설치 → `codex` → `/model` 6.1 Sol → `$exam-start` → `AGENTS.md` 직접 읽기. 업데이트 무시. (clone이 막히면 11줄 직접 입력)
 2. DMs 담당자 수 확인. 범위 → 사례 → 기준 → 예외 → 반대 → 안 만들 것 → 성공 기준 → 합의.
 3. 답은 번호 매겨 전부 `$brief`로 전달 → 요약을 담당자에게 확인 → 합의 제약을 `AGENTS.md`에 반영.
 4. `$plan`(내가 순서 확정) → `$build`(예외를 실패 테스트로 먼저, 단위별 보고를 대조, 새로 생긴 질문은 담당자에게).
