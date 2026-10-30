@@ -1,6 +1,6 @@
 # 개인 스킬셋 (Cofa 응시 환경용)
 
-Codex에서 쓰는 **12개 스킬**과 [공통 지침](_shared/personal-workflow.md)입니다. 업무 담당자 에이전트에게 확인할 사실과 참가자의 판단을 구분하고, 그 근거가 구현·검증·제출 문서·사후 설명까지 이어지게 합니다. 별도 서버·관리 도구·외부 실행 의존성은 없습니다.
+Codex에서 쓰는 **14개 스킬**과 [공통 지침](_shared/personal-workflow.md)입니다. 업무 담당자 에이전트에게 확인할 사실과 참가자의 판단을 구분하고, 그 근거가 구현·검증·제출 문서·사후 설명까지 이어지게 합니다. 별도 서버·관리 도구·외부 실행 의존성은 없습니다.
 
 | 스킬 | 맡기는 요청 |
 |---|---|
@@ -11,6 +11,7 @@ Codex에서 쓰는 **12개 스킬**과 [공통 지침](_shared/personal-workflow
 | [build](build/SKILL.md) | 구현·검증, 독립 작업의 병렬 처리와 통합 |
 | [verify](verify/SKILL.md) | 기술적 동작과 업무 요구 충족을 나눈 검토·판정 |
 | [explain](explain/SKILL.md) | 결정 설명, 제출 문서, 인계, 사후 질의 대비 정리 |
+| [learn](learn/SKILL.md) | 제출 전·인계 전 실제 동작을 익히는 학습 문서와 예상 질문 |
 | [debug](debug/SKILL.md) | 원인 불명 오류의 추적·복구 |
 | [ux](ux/SKILL.md) | 사용자의 이해·조작·완료 문제 개선 |
 | [init](init/SKILL.md) | 기존 프로젝트의 작업 명령·경계와 `AGENTS.md` 정비 |
@@ -18,11 +19,11 @@ Codex에서 쓰는 **12개 스킬**과 [공통 지침](_shared/personal-workflow
 | [wait](wait/SKILL.md) | 이해가 끊긴 지점에서 멈추고 배경·용어·예시로 재설명 |
 | [retro](retro/SKILL.md) | 실제 시행착오를 다음 작업의 지침·검증에 반영 |
 
-자연어로 요청하거나 `$build`처럼 역할을 지정합니다. 12개를 순서대로 실행하지 않으며 작은 수정은 해당 작업만 끝냅니다.
+자연어로 요청하거나 `$build`처럼 역할을 지정합니다. 14개를 순서대로 실행하지 않으며 작은 수정은 해당 작업만 끝냅니다.
 
 ## 두는 위치
 
-12개 스킬 폴더와 `_shared`를 **같은 스킬 폴더 바로 아래에 함께** 둡니다(`_shared` 상대 링크 유지). Codex는 작업 폴더의 `.agents/skills`와 사용자 폴더의 `~/.agents/skills`에서 스킬을 찾습니다. 작업 폴더를 제출물로 깨끗하게 두려면 `~/.agents/skills`를 씁니다.
+14개 스킬 폴더와 `_shared`를 **같은 스킬 폴더 바로 아래에 함께** 둡니다(`_shared` 상대 링크 유지). Codex는 작업 폴더의 `.agents/skills`와 사용자 폴더의 `~/.agents/skills`에서 스킬을 찾습니다. 작업 폴더를 제출물로 깨끗하게 두려면 `~/.agents/skills`를 씁니다.
 
 ```bash
 mkdir -p ~/.agents/skills && cp -R personal-skills/* ~/.agents/skills/
