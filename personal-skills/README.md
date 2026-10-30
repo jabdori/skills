@@ -35,6 +35,7 @@ mkdir -p ~/.agents/skills && cp -R personal-skills/* ~/.agents/skills/
 | 상황 | 사용하는 양식·행동 |
 |---|---|
 | “업무 요구가 있는 과제를 진행해줘” | [요구 근거표](_shared/templates/요구근거.md)를 처음부터 기본으로 사용하고 출처·구현·검증·상태를 갱신. 과제 지정 제출 문서가 있으면 그 안에 둠 |
+| “깊게 조사하거나 만든 화면을 확인해줘” | 심층 조사에만 [조사 근거표](_shared/templates/조사근거.md)를 쓰고, 필요한 원문·자기 화면 확인에는 [agent-browser 참고](_shared/agent-browser.md) |
 | “이 기능을 명세와 작업으로 정리해줘” | [명세·작업 양식](_shared/spec-and-tickets.md) |
 | “독립 작업은 동시에 구현해줘” | [병렬 구현·통합](_shared/parallel-delivery.md). 토큰·시간이 평가되면 꼭 필요한 경우만 |
 | “합쳐도 되는지 검토해줘” | [검토·PR 양식](_shared/review-and-pr.md) |
