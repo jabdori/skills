@@ -226,6 +226,7 @@ python3 ~/.agents/skills/_shared/scripts/presubmit.py --decisions docs/결정.md
 
 | 증상 | 대응 |
 |---|---|
+| Codex 화면에서 드래그해도 선택이 안 되고 ⌘C에 "The terminal has no selection to copy" | Codex 기본 화면 모드가 터미널 마우스를 잡은 것. `codex --no-alt-screen`으로 실행하거나 작업 중이면 `/quit` 뒤 `codex resume --last --no-alt-screen`(실행 옵션이라 설정 변경 아님) |
 | 긴 프롬프트를 붙여 넣었는데 제출이 안 됨 | 붙여넣기 모드입니다. **Enter를 한 번 더** 누릅니다 |
 | Codex에 "Conversation interrupted" | 파일·테스트로 어디까지 됐는지 보고 "끊긴 지점부터 이어서: 남은 일 …"로 다시 요청 |
 | Codex가 주석을 엉뚱한 언어로 씀 | 제출 전 `$explain` 대조 때 함께 고치게 합니다 |

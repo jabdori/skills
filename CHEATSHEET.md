@@ -31,6 +31,7 @@
 ## 지켜볼 것
 - Codex가 **승인 대기**로 멈춰 있지 않은지
 - 긴 프롬프트가 안 넘어가면 Enter 한 번 더
+- Codex 화면에서 드래그·⌘C 복사가 안 되면(“no selection to copy”): Codex가 마우스를 잡은 것. `codex --no-alt-screen`으로 실행, 작업 중이면 `/quit` → `codex resume --last --no-alt-screen`(설정 변경 아님)
 - 새로 생긴 업무 질문은 추측 말고 담당자에게
 - diff에 요청과 무관한 줄(형식·이름·주변 정리)이 보이면 되돌리게 하기 — 서술형 설명 범위가 늘어남
 - 하위 에이전트는 큰 독립 작업에만. 모델은 물려받기, Astra 금지
