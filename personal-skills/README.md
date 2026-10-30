@@ -33,11 +33,11 @@ mkdir -p ~/.agents/skills && cp -R personal-skills/* ~/.agents/skills/
 
 | 상황 | 사용하는 양식·행동 |
 |---|---|
-| “담당자에게 뭘 물어봐야 해?” | [정보 출처와 질문 대상](_shared/personal-workflow.md#정보-출처와-질문-대상): 업무 사실은 담당자·자료, 구현 사실은 코드, 우선순위는 사용자 → 답변·결정·가정을 구분해 명세·검증·설명까지 연결 |
+| “업무 요구가 있는 과제를 진행해줘” | [요구 근거표](_shared/templates/요구근거.md)를 처음부터 기본으로 사용하고 출처·구현·검증·상태를 갱신. 과제 지정 제출 문서가 있으면 그 안에 둠 |
 | “이 기능을 명세와 작업으로 정리해줘” | [명세·작업 양식](_shared/spec-and-tickets.md) |
 | “독립 작업은 동시에 구현해줘” | [병렬 구현·통합](_shared/parallel-delivery.md). 토큰·시간이 평가되면 꼭 필요한 경우만 |
 | “합쳐도 되는지 검토해줘” | [검토·PR 양식](_shared/review-and-pr.md) |
-| “제출 전 근거·설명·생성물을 확인해줘” | 필요한 경우 [요구 근거표](_shared/templates/요구근거.md)·[결정 문서](_shared/templates/DECISIONS.md)·[설명 카드](_shared/templates/설명카드.md)와 [읽기 전용 점검](_shared/scripts/presubmit.py) |
+| “제출 전 설명·생성물을 확인해줘” | 근거표에서 시작해 필요한 경우 [결정 문서](_shared/templates/DECISIONS.md)·[설명 카드](_shared/templates/설명카드.md)와 [읽기 전용 점검](_shared/scripts/presubmit.py) |
 | “주문 완료와 결제 완료는 같은 뜻이야?” | [용어와 의미 지도](_shared/personal-workflow.md#용어와-의미-지도) |
 
 검사 결과는 [공통 판정 기준](_shared/personal-workflow.md#실제-변경과-검사-근거)으로 확인합니다. Python 표준 `unittest`에서 수집 누락·전체 생략을 구분해야 할 때만 [검사 보조](verify/scripts/verify_unittest.py)를 씁니다.
