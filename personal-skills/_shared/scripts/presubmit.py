@@ -3,6 +3,8 @@
 
 import argparse
 import os
+import re
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -12,7 +14,7 @@ LARGE_BYTES = 5 * 1024 * 1024
 
 
 def git(root, *args):
-    return subprocess.run(['git', *args], cwd=root, capture_output=True)
+    return subprocess.run(['git', '--no-optional-locks', *args], cwd=root, capture_output=True)
 
 
 def base_commit(root, ref):
@@ -42,6 +44,83 @@ def changes(root, base):
         raise ValueError('미추적 파일을 읽지 못했습니다.')
     found.extend(('신규', os.fsdecode(path)) for path in untracked.stdout.split(b'\0') if path)
     return sorted(found, key=lambda item: item[1])
+
+
+def protect_path(value):
+    value = value.strip().strip('`')
+    path = Path(value)
+    if not value or path.is_absolute() or '..' in path.parts:
+        raise ValueError(f'수정 금지 파일 경로가 작업 폴더 밖이거나 비어 있습니다: {value}')
+    return path.as_posix()
+
+
+def project_protected(root):
+    agents = root / 'AGENTS.md'
+    if not agents.is_file():
+        return set()
+    try:
+        lines = agents.read_text(encoding='utf-8').splitlines()
+    except (OSError, UnicodeError) as error:
+        raise ValueError('AGENTS.md를 읽지 못했습니다.') from error
+    protected = set()
+    in_project = False
+    list_items = False
+    for line in lines:
+        if line.startswith('## '):
+            in_project = line.strip() == '## 이 프로젝트'
+            list_items = False
+            continue
+        if not in_project:
+            continue
+        match = re.match(r'^\s*(?:[-*]\s*)?수정 금지(?: 파일| 목록)?\s*:\s*(.*)$', line)
+        if match:
+            value = match.group(1)
+            list_items = not value.strip()
+        elif list_items and re.match(r'^\s{2,}[-*]\s+', line):
+            value = re.sub(r'^\s*[-*]\s+', '', line)
+        else:
+            list_items = False
+            continue
+        entries = re.findall(r'`([^`]+)`', value) or value.split(',')
+        protected.update(protect_path(entry) for entry in entries if entry.strip() and entry.strip() not in {'없음', '미확인'})
+    return protected
+
+
+def protection_warnings(root, base, changed, extra):
+    protected = {'README.md'} | project_protected(root) | {protect_path(value) for value in extra}
+    warnings = set()
+    for _, name in changed:
+        if name not in protected:
+            continue
+        existing = git(root, 'cat-file', '-e', f'{base}:{name}').returncode == 0
+        hint = (f'git checkout {base} -- {shlex.quote(name)}' if existing
+                else '기준 커밋에 파일이 없어 직접 확인이 필요합니다')
+        warnings.add(f'수정 금지 파일 변경: {name} (되돌리기 안내: {hint})')
+    return warnings
+
+
+def commit_warnings(root, base):
+    warnings = set()
+    status = git(root, 'status', '--porcelain=v1', '-z', '--untracked-files=all')
+    if status.returncode:
+        raise ValueError('커밋 안 된 변경을 읽지 못했습니다.')
+    if status.stdout:
+        warnings.add('커밋 안 된 변경이 있습니다.')
+    history = git(root, 'rev-list', '--reverse', f'{base}..HEAD')
+    if history.returncode:
+        raise ValueError('시작 커밋 이후 이력을 읽지 못했습니다.')
+    commits = history.stdout.splitlines()
+    if not commits:
+        warnings.add('검증된 단위 커밋 없음: 시작 커밋 뒤의 커밋이 없습니다.')
+    for sha in commits:
+        subject = git(root, 'log', '-1', '--format=%s', sha.decode('ascii'))
+        if subject.returncode:
+            raise ValueError('커밋 메시지를 읽지 못했습니다.')
+        message = subject.stdout.decode('utf-8', errors='replace').strip()
+        match = re.fullmatch(r'[a-z][a-z0-9-]*(?:\([^()\n]+\))?!?: (.+)', message)
+        if not match or not re.search(r'[가-힣]', match.group(1)):
+            warnings.add(f'커밋 메시지 형식 또는 한국어 요약 오류: {sha[:12].decode()} {message}')
+    return warnings
 
 
 def file_warnings(root, changed):
@@ -109,6 +188,7 @@ def main():
     parser.add_argument('--test', help='실행할 검사 명령. 검사 자체의 파일 변경은 막지 않습니다.')
     parser.add_argument('--decisions', type=Path, help='결정 문서 경로. 기본값은 존재하는 DECISIONS.md입니다.')
     parser.add_argument('--base', help='비교 기준 커밋. 기본값은 현재 이력의 최초 커밋입니다.')
+    parser.add_argument('--protect', action='append', default=[], metavar='FILE', help='수정 금지 파일(반복 지정 가능). README.md는 기본 보호합니다.')
     args = parser.parse_args()
     current = Path.cwd()
     result = git(current, 'rev-parse', '--show-toplevel')
@@ -118,7 +198,10 @@ def main():
     root = Path(os.fsdecode(result.stdout.strip())).resolve()
     try:
         base = base_commit(root, args.base)
+        test_failed = run_test(root, args.test) if args.test else False
         changed = changes(root, base)
+        protected_issues = protection_warnings(root, base, changed, args.protect)
+        commit_issues = commit_warnings(root, base)
     except ValueError as error:
         print(error)
         return 1
@@ -132,10 +215,9 @@ def main():
     document_issues, checked = document_warnings(root, changed, args.decisions)
     if checked is not None:
         print(f'결정 문서 대조: 코드 {checked}개')
-    warnings = file_warnings(root, changed) | document_issues
+    warnings = file_warnings(root, changed) | document_issues | protected_issues | commit_issues
     for warning in sorted(warnings):
         print(f'주의: {warning}')
-    test_failed = run_test(root, args.test) if args.test else False
     print('결과: 점검 필요' if warnings or test_failed else '결과: 추가 경고 없음')
     return 1 if warnings or test_failed else 0
 

@@ -21,6 +21,8 @@ class PresubmitTest(unittest.TestCase):
         self.run_git('config', 'user.name', 'Test')
         self.run_git('config', 'user.email', 'test@example.invalid')
         (self.root / 'app.py').write_text('print("ok")\n')
+        (self.root / 'README.md').write_text('# 과제 안내\n')
+        (self.root / 'protected.txt').write_text('제공 파일\n')
         (self.root / 'obsolete.txt').write_text('old\n')
         self.run_git('add', '.')
         self.run_git('commit', '-qm', 'start')
@@ -56,6 +58,8 @@ class PresubmitTest(unittest.TestCase):
         tests = self.root / 'tests'
         tests.mkdir()
         (tests / 'test_ok.py').write_text('import unittest\nclass Smoke(unittest.TestCase):\n def test_ok(self): self.assertTrue(True)\n')
+        self.run_git('add', 'tests/test_ok.py')
+        self.run_git('commit', '-qm', 'test: 기본 검사를 추가함')
 
         result = self.check_script('--test', f'{sys.executable} -m unittest discover -s tests -v')
 
@@ -76,6 +80,8 @@ class PresubmitTest(unittest.TestCase):
         self.assertIn('test exit 0', missing.stdout)
 
         (self.root / 'DECISIONS.md').write_text('app.js와 test.mjs를 확인했습니다.\n')
+        self.run_git('add', 'app.js', 'test.mjs', 'DECISIONS.md')
+        self.run_git('commit', '-qm', 'test: 문서와 검사를 맞춤')
         covered = self.check_script('--test', command)
         self.assertEqual(covered.returncode, 0, covered.stdout + covered.stderr)
 
@@ -94,7 +100,7 @@ class PresubmitTest(unittest.TestCase):
     def test_committed_change_is_counted_and_base_can_be_overridden(self):
         (self.root / 'app.py').write_text('print("committed")\n')
         self.run_git('add', 'app.py')
-        self.run_git('commit', '-qm', 'work')
+        self.run_git('commit', '-qm', 'fix: 출력 값을 수정함')
         (self.root / 'DECISIONS.md').write_text('# 결정\n')
 
         default = self.check_script()
@@ -104,9 +110,10 @@ class PresubmitTest(unittest.TestCase):
         self.assertIn('결정 문서 대조: 코드 1개', default.stdout)
 
         head = self.check_script('--base', 'HEAD')
-        self.assertEqual(head.returncode, 0, head.stdout + head.stderr)
+        self.assertEqual(head.returncode, 1, head.stdout + head.stderr)
         self.assertIn('수정 0', head.stdout)
         self.assertIn('결정 문서 대조: 코드 0개', head.stdout)
+        self.assertIn('검증된 단위 커밋 없음', head.stdout)
 
     def test_staged_unstaged_untracked_and_deleted_are_counted_together(self):
         (self.root / 'app.py').write_text('print("working")\n')
@@ -116,10 +123,66 @@ class PresubmitTest(unittest.TestCase):
         (self.root / 'obsolete.txt').unlink()
 
         result = self.check_script()
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn('수정 1 · 신규 2 · 삭제 1', result.stdout)
+        self.assertIn('커밋 안 된 변경', result.stdout)
         for name in ('app.py', 'staged.py', 'loose.py', 'obsolete.txt'):
             self.assertIn(name, result.stdout)
+
+    def test_readme_change_is_protected_and_not_reverted(self):
+        (self.root / 'README.md').write_text('# 바뀐 과제 안내\n')
+        result = self.check_script()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('수정 금지 파일 변경: README.md', result.stdout)
+        self.assertIn('git checkout', result.stdout)
+        self.assertEqual((self.root / 'README.md').read_text(), '# 바뀐 과제 안내\n')
+
+        self.run_git('add', 'README.md')
+        self.run_git('commit', '-qm', 'docs: 안내문 변경을 기록함')
+        committed = self.check_script()
+        self.assertEqual(committed.returncode, 1, committed.stdout + committed.stderr)
+        self.assertIn('수정 금지 파일 변경: README.md', committed.stdout)
+
+    def test_explicit_protected_file(self):
+        (self.root / 'protected.txt').write_text('변경된 파일\n')
+        result = self.check_script('--protect', 'protected.txt')
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('수정 금지 파일 변경: protected.txt', result.stdout)
+        self.assertEqual((self.root / 'protected.txt').read_text(), '변경된 파일\n')
+
+    def test_project_protected_file(self):
+        (self.root / 'AGENTS.md').write_text('## 이 프로젝트\n- 수정 금지 파일: README.md, protected.txt\n')
+        self.run_git('add', 'AGENTS.md')
+        self.run_git('commit', '-qm', 'docs: 보호 목록을 기록함')
+        (self.root / 'protected.txt').write_text('변경된 파일\n')
+
+        result = self.check_script()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('수정 금지 파일 변경: protected.txt', result.stdout)
+        self.assertEqual((self.root / 'protected.txt').read_text(), '변경된 파일\n')
+
+    def test_uncommitted_change_and_no_unit_commit_warn(self):
+        (self.root / 'app.py').write_text('print("changed")\n')
+        result = self.check_script()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('커밋 안 된 변경', result.stdout)
+        self.assertIn('검증된 단위 커밋 없음', result.stdout)
+
+    def test_english_commit_summary_warns(self):
+        (self.root / 'app.py').write_text('print("changed")\n')
+        self.run_git('add', 'app.py')
+        self.run_git('commit', '-qm', 'feat: add feature')
+        result = self.check_script()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('커밋 메시지 형식 또는 한국어 요약', result.stdout)
+
+    def test_valid_committed_change_has_no_new_warning(self):
+        (self.root / 'app.py').write_text('print("changed")\n')
+        self.run_git('add', 'app.py')
+        self.run_git('commit', '-qm', 'fix: 출력 값을 고침')
+        result = self.check_script()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('결과: 추가 경고 없음', result.stdout)
 
     @unittest.skipUnless(REHEARSAL_ARCHIVE and Path(REHEARSAL_ARCHIVE).is_file(), '실제 제출물 경로가 필요합니다')
     def test_real_wafer_submission_counts_commits_and_document_coverage(self):
