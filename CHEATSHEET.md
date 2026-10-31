@@ -3,7 +3,7 @@
 작업 폴더에 복사하지 마세요(제출물에 섞임). 터미널 + 버튼으로 새 탭을 열어 봅니다.
 
 ## 시작 (10:00)
-1. `git clone`(설치 한 줄) → `codex` → `/model` Sol 6.1 → `$exam-start`
+1. `git clone`(설치 한 줄) → `codex --no-alt-screen`(드래그·⌘C 복사 가능, 업데이트 안내는 Esc) → `/model` Sol 6.1 → `$exam-start`
 2. AGENTS.md를 직접 읽기(없었으면 새로 만들어짐) → DMs에서 담당자 수 확인. Update available·F2 warning은 무시
 3. clone 실패 시: AGENTS.md 맨 아래에 12줄 직접 입력(묻는다·합의·확인·구분·작게·늘리지 않음·상황별 스킬·push 금지·권장 모델만·0.0.0.0·제출물·설명)
 
