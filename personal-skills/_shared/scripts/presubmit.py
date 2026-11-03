@@ -170,22 +170,64 @@ def document_warnings(root, changed, document):
              if Path(name).name not in content}, len(code_files))
 
 
-def run_test(root, command):
+def acceptance_warnings(root, path, required):
+    if path is None:
+        path = Path('인수점검표.md')
+        if not (root / path).is_file() and (root / 'DECISIONS.md').is_file():
+            try:
+                if re.search(r'^#{1,6}\s+인수 점검표\s*$', (root / 'DECISIONS.md').read_text(encoding='utf-8'), re.M):
+                    path = Path('DECISIONS.md')
+            except (OSError, UnicodeError):
+                pass
+    if not required and path == Path('인수점검표.md') and not (root / path).exists():
+        return set()
+    document = (root / path).resolve()
+    if not document.is_relative_to(root) or not document.is_file():
+        return {f'인수 점검표 없음: {path}'}
+    try:
+        content = document.read_text(encoding='utf-8')
+    except (OSError, UnicodeError):
+        return {f'인수 점검표를 읽을 수 없습니다: {path}'}
+    heading = re.search(r'^#{1,6}\s+인수 점검표\s*$', content, re.M)
+    if not heading:
+        return {f'인수 점검표 구역 없음: {path}'}
+    section = re.split(r'^#{1,6}\s+', content[heading.end():], maxsplit=1, flags=re.M)[0]
+    warnings = set()
+    rows = 0
+    for line in section.splitlines():
+        if not line.startswith('|'):
+            continue
+        cells = [part.strip() for part in line.strip('|').split('|')]
+        if len(cells) < 4 or cells[0] == '요구사항' or re.fullmatch(r'[-: ]+', cells[0]):
+            continue
+        rows += 1
+        if not cells[0] or cells[2] not in {'통과', '부분', '미확인'}:
+            warnings.add(f'인수 점검표 요구사항·상태 확인 필요: {cells[0] or "빈 행"}')
+        elif cells[2] != '통과':
+            warnings.add(f'인수 점검표 {cells[2]}: {cells[0]}')
+    if not rows:
+        warnings.add(f'인수 점검표 요구사항 없음: {path}')
+    return warnings
+
+
+def run_test(root, command, label='테스트'):
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
-    print(f'테스트: {command}')
+    print(f'{label}: {command}')
     result = subprocess.run(command, shell=True, cwd=root, env=env, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     output = result.stdout.decode('utf-8', errors='replace')
     tail = '\n'.join(output.splitlines()[-20:])[-2000:]
     if tail:
         print(tail)
-    print(f'test exit {result.returncode}')
+    print(f'{"test" if label == "테스트" else "계약 검사"} exit {result.returncode}')
     return result.returncode != 0
 
 
 def main():
     parser = argparse.ArgumentParser(description='제출 전 Git 변경·생성물·결정 문서를 읽기 전용으로 확인합니다.')
     parser.add_argument('--test', help='실행할 검사 명령. 검사 자체의 파일 변경은 막지 않습니다.')
+    parser.add_argument('--contract', help='지정 내보내기·API 형식과 숫자 운영 규칙을 확인할 계약 검사 명령.')
+    parser.add_argument('--acceptance', type=Path, help='인수 점검표 경로. 기본값은 인수점검표.md 또는 DECISIONS.md 구역입니다.')
     parser.add_argument('--decisions', type=Path, help='결정 문서 경로. 기본값은 존재하는 DECISIONS.md입니다.')
     parser.add_argument('--base', help='비교 기준 커밋. 기본값은 현재 이력의 최초 커밋입니다.')
     parser.add_argument('--protect', action='append', default=[], metavar='FILE', help='수정 금지 파일(반복 지정 가능). README.md는 기본 보호합니다.')
@@ -196,9 +238,11 @@ def main():
         print('Git 작업 폴더가 아닙니다.')
         return 1
     root = Path(os.fsdecode(result.stdout.strip())).resolve()
+    schema_present = any((root / name).is_file() for name in ('EXPORT_SCHEMA.md', 'API_SCHEMA.md', 'openapi.yaml', 'openapi.yml', 'openapi.json'))
     try:
         base = base_commit(root, args.base)
         test_failed = run_test(root, args.test) if args.test else False
+        contract_failed = run_test(root, args.contract, '계약 검사') if args.contract else False
         changed = changes(root, base)
         protected_issues = protection_warnings(root, base, changed, args.protect)
         commit_issues = commit_warnings(root, base)
@@ -215,11 +259,16 @@ def main():
     document_issues, checked = document_warnings(root, changed, args.decisions)
     if checked is not None:
         print(f'결정 문서 대조: 코드 {checked}개')
-    warnings = file_warnings(root, changed) | document_issues | protected_issues | commit_issues
+    warnings = (file_warnings(root, changed) | document_issues | protected_issues | commit_issues
+                | acceptance_warnings(root, args.acceptance, schema_present))
+    if schema_present and not args.contract:
+        warnings.add('계약 검사기 미실행: --contract 명령을 지정하세요.')
+    if contract_failed:
+        warnings.add('계약 검사기 실패: 지정한 명령과 출력을 확인하세요.')
     for warning in sorted(warnings):
         print(f'주의: {warning}')
-    print('결과: 점검 필요' if warnings or test_failed else '결과: 추가 경고 없음')
-    return 1 if warnings or test_failed else 0
+    print('결과: 점검 필요' if warnings or test_failed or contract_failed else '결과: 추가 경고 없음')
+    return 1 if warnings or test_failed or contract_failed else 0
 
 
 if __name__ == '__main__':

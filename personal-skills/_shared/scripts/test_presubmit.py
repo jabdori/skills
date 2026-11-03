@@ -184,6 +184,50 @@ class PresubmitTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('결과: 추가 경고 없음', result.stdout)
 
+    def test_schema_without_checklist_or_contract_warns_without_writing(self):
+        (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
+        self.run_git('add', 'EXPORT_SCHEMA.md')
+        self.run_git('commit', '-qm', 'docs: 형식을 기록함')
+        result = self.check_script('--test', f'{sys.executable} -c "pass"')
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('인수 점검표 없음', result.stdout)
+        self.assertIn('계약 검사기 미실행', result.stdout)
+        self.assertFalse((self.root / '인수점검표.md').exists())
+
+    def test_acceptance_partial_and_unconfirmed_warn(self):
+        (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
+        (self.root / '인수점검표.md').write_text(
+            '# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n'
+            '|---|---|---|---|\n| 1 배정 | 검사 | 통과 | test_assignment |\n'
+            '| 2 상태 | 검토 시각 | 부분 | app.py:12 |\n'
+            '| 3 내보내기 | 스키마 검사 | 미확인 | 없음 |\n')
+        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md')
+        self.run_git('commit', '-qm', 'docs: 인수 기준을 기록함')
+        result = self.check_script('--contract', f'{sys.executable} -c "pass"')
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('인수 점검표 부분: 2 상태', result.stdout)
+        self.assertIn('인수 점검표 미확인: 3 내보내기', result.stdout)
+        self.assertNotIn('계약 검사기 미실행', result.stdout)
+
+    def test_contract_failure_warns_and_embedded_checklist_passes(self):
+        (self.root / 'API_SCHEMA.md').write_text('# API 형식\n')
+        (self.root / 'DECISIONS.md').write_text(
+            '# 결정\n## 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n'
+            '|---|---|---|---|\n| 1 조회 | 요청 검사 | 통과 | test_api |\n'
+            '## 답안 재료\n| 이 문장은 표가 아닙니다 |\n')
+        self.run_git('add', 'API_SCHEMA.md', 'DECISIONS.md')
+        self.run_git('commit', '-qm', 'docs: API 인수 기준을 기록함')
+        failed = self.check_script('--acceptance', 'DECISIONS.md',
+                                   '--contract', f'{sys.executable} -c "import sys; sys.exit(4)"')
+        self.assertEqual(failed.returncode, 1, failed.stdout + failed.stderr)
+        self.assertIn('계약 검사기 실패', failed.stdout)
+        self.assertNotIn('인수 점검표 없음', failed.stdout)
+
+        passed = self.check_script('--acceptance', 'DECISIONS.md',
+                                   '--contract', f'{sys.executable} -c "pass"')
+        self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+        self.assertIn('계약 검사 exit 0', passed.stdout)
+
     @unittest.skipUnless(REHEARSAL_ARCHIVE and Path(REHEARSAL_ARCHIVE).is_file(), '실제 제출물 경로가 필요합니다')
     def test_real_wafer_submission_counts_commits_and_document_coverage(self):
         with tempfile.TemporaryDirectory() as tmp:
