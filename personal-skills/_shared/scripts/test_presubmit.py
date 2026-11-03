@@ -230,6 +230,15 @@ class PresubmitTest(unittest.TestCase):
         self.assertIn('계약 검사기 미실행', result.stdout)
         self.assertFalse((self.root / '인수점검표.md').exists())
 
+    def test_own_submission_docs_missing_or_blank_warn(self):
+        (self.root / 'README.md').write_text('# 과제 안내\nHOW_TO_RUN.md와 AI_COLLABORATION.md를 작성하세요.\n')
+        (self.root / 'AI_COLLABORATION.md').write_text('# AI_COLLABORATION\n## Q1\n(답변)\n')
+        self.run_git('add', '.')
+        self.run_git('commit', '-qm', 'docs: 양식을 추가함')
+        out = self.check_script().stdout
+        self.assertIn('HOW_TO_RUN.md 없음', out)
+        self.assertIn('AI_COLLABORATION.md에 양식 빈칸', out)
+
     def test_working_tables_mixed_into_submission_doc_warn(self):
         (self.root / 'HOW_TO_RUN.md').write_text('# HOW_TO_RUN\n\n## 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n')
         self.run_git('add', 'HOW_TO_RUN.md')

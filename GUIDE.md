@@ -279,7 +279,7 @@ python3 ~/.agents/skills/_shared/scripts/presubmit.py --decisions docs/결정.md
 - Git push·외부 전송·개인 파일 업로드, Codex 업데이트·설정 변경은 하지 않는다. 시작 상태와 합의·주요 결정·검증된 단위마다 한국어 Conventional Commits 메시지로 로컬 커밋한다.
 - 모델은 권장 모델(Sol 6.1·Terra 5.6·Luna 6·Sol 6.0)만 쓰고 Astra는 쓰지 않는다. 하위 에이전트도 같다.
 - 웹 서버는 0.0.0.0에 바인딩하고 실제 포트를 알려준다.
-- README·과제 안내의 필수 제출물과 파일명을 따른다. 결정 문서에는 판단·근거·검증·한계를 쓴다.
+- README·과제 안내의 필수 제출물과 파일명을 따른다. HOW_TO_RUN.md·AI_COLLABORATION.md처럼 내가 쓰는 제출 문서는 내가 명시적으로 요청할 때만 만들거나 고치고, 평소에는 확인된 재료만 docs/에 준다. 결정 문서에는 판단·근거·검증·한계를 쓴다.
 - 결과는 내가 코드 위치와 함께 직접 설명할 수 있게 초보자도 알 쉬운 말로 설명한다. 문서 그림은 docs/assets/의 별도 SVG를 상대 경로로 연결하고, 터미널에서는 ASCII로 그린다(Mermaid·인라인 SVG 금지).
 ```
 

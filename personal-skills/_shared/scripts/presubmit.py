@@ -220,6 +220,22 @@ def acceptance_warnings(root, path, required):
     return warnings
 
 
+def own_document_warnings(root):
+    # 응시자가 직접 쓰는 제출 문서가 없거나 양식 빈칸이 남았는지 확인합니다(README가 요구한 경우만).
+    readme = root / 'README.md'
+    required = readme.read_text(encoding='utf-8', errors='replace') if readme.is_file() else ''
+    warnings = set()
+    for name in ('HOW_TO_RUN.md', 'AI_COLLABORATION.md'):
+        if name not in required:
+            continue
+        path = root / name
+        if not path.is_file():
+            warnings.add(f'{name} 없음: 직접 작성할 제출 문서입니다(재료는 docs/제출문서_재료.md).')
+        elif '(답변)' in path.read_text(encoding='utf-8', errors='replace'):
+            warnings.add(f'{name}에 양식 빈칸 "(답변)"이 남아 있음: 직접 채우세요.')
+    return warnings
+
+
 def mixed_document_warnings(root):
     # 작업 문서(근거표·인수 점검표)는 docs/에 두고 제출 문서에는 링크만 겁니다.
     markers = (('## 인수 점검표', '인수 점검표'), ('| 요구·예외 | 근거 출처', '요구 근거표'))
@@ -285,7 +301,7 @@ def main():
     if checked is not None:
         print(f'결정 문서 대조: 코드 {checked}개')
     warnings = (file_warnings(root, changed) | document_issues | protected_issues | commit_issues
-                | acceptance_warnings(root, args.acceptance, schema_present) | mixed_document_warnings(root))
+                | acceptance_warnings(root, args.acceptance, schema_present) | mixed_document_warnings(root) | own_document_warnings(root))
     if schema_present and not args.contract:
         warnings.add('계약 검사기 미실행: --contract 명령을 지정하세요.')
     if contract_failed:
