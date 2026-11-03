@@ -184,6 +184,42 @@ class PresubmitTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn('결과: 추가 경고 없음', result.stdout)
 
+    def test_docs_decision_document_takes_priority_over_legacy_root(self):
+        (self.root / 'app.py').write_text('print("changed")\n')
+        (self.root / 'DECISIONS.md').write_text('# 오래된 결정\n')
+        docs = self.root / 'docs'
+        docs.mkdir()
+        (docs / 'DECISIONS.md').write_text('app.py 변경 근거\n')
+        self.run_git('add', 'app.py', 'DECISIONS.md', 'docs/DECISIONS.md')
+        self.run_git('commit', '-qm', 'docs: 결정 위치를 정리함')
+        result = self.check_script()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('결정 문서에 언급되지 않은 코드', result.stdout)
+
+    def test_docs_checklist_takes_priority_over_legacy_root(self):
+        (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
+        (self.root / '인수점검표.md').write_text('# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 부분 | 없음 |\n')
+        docs = self.root / 'docs'
+        docs.mkdir()
+        (docs / '인수점검표.md').write_text('# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 통과 | test_query |\n')
+        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/인수점검표.md')
+        self.run_git('commit', '-qm', 'docs: 인수 근거를 정리함')
+        result = self.check_script('--contract', f'{sys.executable} -c "pass"')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('인수 점검표 부분', result.stdout)
+
+    def test_docs_decision_section_takes_priority_over_legacy_root_checklist(self):
+        (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
+        (self.root / '인수점검표.md').write_text('# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 부분 | 없음 |\n')
+        docs = self.root / 'docs'
+        docs.mkdir()
+        (docs / 'DECISIONS.md').write_text('# 결정\n## 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 통과 | test_query |\n')
+        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/DECISIONS.md')
+        self.run_git('commit', '-qm', 'docs: 인수 구역을 정리함')
+        result = self.check_script('--contract', f'{sys.executable} -c "pass"')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('인수 점검표 부분', result.stdout)
+
     def test_schema_without_checklist_or_contract_warns_without_writing(self):
         (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
         self.run_git('add', 'EXPORT_SCHEMA.md')

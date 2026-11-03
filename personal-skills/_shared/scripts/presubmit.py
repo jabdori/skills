@@ -152,9 +152,11 @@ def file_warnings(root, changed):
 
 def document_warnings(root, changed, document):
     if document is None:
-        document = (root / 'DECISIONS.md').resolve()
-        if not document.exists():
+        document = next((root / path for path in ('docs/DECISIONS.md', 'DECISIONS.md')
+                         if (root / path).is_file()), None)
+        if document is None:
             return set(), None
+        document = document.resolve()
     else:
         document = (root / document).resolve()
     if not document.is_relative_to(root):
@@ -172,14 +174,22 @@ def document_warnings(root, changed, document):
 
 def acceptance_warnings(root, path, required):
     if path is None:
-        path = Path('인수점검표.md')
-        if not (root / path).is_file() and (root / 'DECISIONS.md').is_file():
+        for candidate in ('docs/인수점검표.md', 'docs/DECISIONS.md', '인수점검표.md', 'DECISIONS.md'):
+            file = root / candidate
+            if not file.is_file():
+                continue
+            if file.name == '인수점검표.md':
+                path = Path(candidate)
+                break
             try:
-                if re.search(r'^#{1,6}\s+인수 점검표\s*$', (root / 'DECISIONS.md').read_text(encoding='utf-8'), re.M):
-                    path = Path('DECISIONS.md')
+                if re.search(r'^#{1,6}\s+인수 점검표\s*$', file.read_text(encoding='utf-8'), re.M):
+                    path = Path(candidate)
+                    break
             except (OSError, UnicodeError):
-                pass
-    if not required and path == Path('인수점검표.md') and not (root / path).exists():
+                continue
+        if path is None:
+            path = Path('docs/인수점검표.md')
+    if not required and not (root / path).exists():
         return set()
     document = (root / path).resolve()
     if not document.is_relative_to(root) or not document.is_file():
@@ -227,8 +237,8 @@ def main():
     parser = argparse.ArgumentParser(description='제출 전 Git 변경·생성물·결정 문서를 읽기 전용으로 확인합니다.')
     parser.add_argument('--test', help='실행할 검사 명령. 검사 자체의 파일 변경은 막지 않습니다.')
     parser.add_argument('--contract', help='지정 내보내기·API 형식과 숫자 운영 규칙을 확인할 계약 검사 명령.')
-    parser.add_argument('--acceptance', type=Path, help='인수 점검표 경로. 기본값은 인수점검표.md 또는 DECISIONS.md 구역입니다.')
-    parser.add_argument('--decisions', type=Path, help='결정 문서 경로. 기본값은 존재하는 DECISIONS.md입니다.')
+    parser.add_argument('--acceptance', type=Path, help='인수 점검표 경로. 기본값은 docs/인수점검표.md, 없으면 루트 또는 결정 문서 구역입니다.')
+    parser.add_argument('--decisions', type=Path, help='결정 문서 경로. 기본값은 docs/DECISIONS.md, 없으면 루트 DECISIONS.md입니다.')
     parser.add_argument('--base', help='비교 기준 커밋. 기본값은 현재 이력의 최초 커밋입니다.')
     parser.add_argument('--protect', action='append', default=[], metavar='FILE', help='수정 금지 파일(반복 지정 가능). README.md는 기본 보호합니다.')
     args = parser.parse_args()
