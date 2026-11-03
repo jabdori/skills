@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "checked_on": "2026-11-03",
+  "skills": [
+    {
+      "name": "find-skills",
+      "repo": "vercel-labs/skills",
+      "commit": "7a5e920bead4b1039a6d6df5d7e1163b7b09423a",
+      "source": "skills/find-skills",
+      "license": "MIT",
+      "license_path": "LICENSE",
+      "files": {
+        "LICENSE": "661142e53c313d2bb5e1b055f5c0a39001450ff1b5e27b89dc4bc7de9a6352ca",
+        "SKILL.md": "c00eeea0e13e74fe4a9d84ba0a8542205a1b736d65f13134fe1a6647eb14976f",
+        "ThirdPartyNoticeText.txt": "ad017718e485f2d634341e32e91c4e48feee89db01f04b17e4db6c4c912339a6"
+      },
+      "vendor": "find-skills"
+    },
+    {
+      "name": "use-modern-go",
+      "repo": "JetBrains/go-modern-guidelines",
+      "commit": "155dc7ca10da5e1f6c841503086957b1b37f5815",
+      "source": "plugin/skills/use-modern-go",
+      "license": "Apache-2.0",
+      "license_path": "LICENSE",
+      "files": {
+        "LICENSE": "304264c63c5fb4cf3bc22746f1fd8958fc34f69cf1a389f7c7b2182985691bfd",
+        "SKILL.md": "d5f4918c97aa4d8bd5ae4df31ab74dea56175248bd432169677c3ff432888f16",
+        "scripts/VERSION": "588f5d8e92b8639ca0f92b568a7f881a32531a06112de4bb7705f4fbeede5ae5",
+        "scripts/run-tool.ps1": "7bd7bd8c8394e9cdbd290251b143e54639e527d52a1099135f1ba91edb5a677b",
+        "scripts/run-tool.sh": "a593b2484834fc7d068e7cbe1a09f92b149ed61b9a07556ea50790d95f50a25b"
+      },
+      "vendor": "use-modern-go"
+    },
+    {
+      "name": "shadcn",
+      "repo": "shadcn-ui/ui",
+      "commit": "4aaea19d9cff3e0908e12a8c1d504b8c5ec34610",
+      "source": "skills/shadcn",
+      "license": "MIT",
+      "license_path": "LICENSE.md",
+      "files": {
+        "LICENSE.md": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f",
+        "SKILL.md": "93951e5e83f616a3e046491c00d770bd54c0a64164706cd1191822a233d27592",
+        "agents/openai.yml": "35db91b1eef58b2abe01da9b88577de5a44e233b740cd93d692ddeeadd2afe4d",
+        "assets/shadcn-small.png": "0ecc62d682727f68fc4937eed19960c706714fa084d44f63028d611ae02bf3d7",
+        "assets/shadcn.png": "7d60ad6fec4d89a0d44ba5a3c9283d2fea0047af5467f9227040e20d927d39b7",
+        "assets/showcase/color-pair.tsx": "6028f0b677912216822fdaf76ae6b8863c429916ed4a9626b73f4de4506f8ee4",
+        "assets/showcase/preview-states.css": "8d9e3cec24dd01b11c5ba12196d0376a131797d9ad247ea624e66eb8bbf61b0e",
+        "assets/showcase/state-matrix.tsx": "07794119fe05ff735358b3f8ca30a8297617ab64dfb3901dce4d89fe5f443458",
+        "cli.md": "a381e35bf36fe7bb851952c13707e01e82434fd7a4a4e53f6df26c6370838904",
+        "customization.md": "a19e81c78843df255e85755e52659268d793845add845b34ad8091f62bff3af9",
+        "design-system-page.md": "c541d661af159548744be3e27f79e7da710ab83f9afd448a4346f7ff1531d328",
+        "design-system.md": "9ed11e93e7e80e34c8795d5ba82e5420ca905e8e9949fef79cbe9239184fd06b",
+        "evals/evals.json": "e82c747326a5c21e37a1c962274d36b1bfebb3e6602ee368b98e2dba5db18369",
+        "mcp.md": "8d696b4e45b7d0e337367248513bd9acebe8f3bcfd7b748c775e5a337c8f38c8",
+        "registry.md": "4f239be36bd2b58e17047db1ca80ab7da00e15a8b73242e5e4d50d113c4caa05",
+        "rules/base-vs-radix.md": "2b2deb47d004285220c1fc6b38bb2edc2d0ccbcdafd031b0b189d5d8ed0d1ba8",
+        "rules/chat.md": "4b4610d487ddc9751f3cfe0c554a06560ac723fcc2460abad77a1d3c7c9a4b95",
+        "rules/composition.md": "f282df828d83a91132a846ddb62eea149a7c7c94822e9ca88cfddf85af01aa41",
+        "rules/forms.md": "29593e14381e34626f8e0e9c15c59f3394b92a0623af6a6ec94585400123853c",
+        "rules/icons.md": "d4a58266648872d9ee07d0c2368843a1cb88b8253b7f528dd7bda9d68b6c2535",
+        "rules/styling.md": "f88fbd72dff862805b786dc7d7e4c74c83030fc278c5b97c993e4e665001798c",
+        "scripts/showcase-coverage.mjs": "fb593e0806414d23b51354a46881f0b2873afc226bda0926a22f83cbd60af2fa"
+      },
+      "vendor": "shadcn"
+    }
+  ],
+  "remote": {
+    "repo": "vercel-labs/agent-skills",
+    "commit": "1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62",
+    "license": "NO-ROOT-LICENSE",
+    "skills": {
+      "vercel-react-best-practices": "skills/react-best-practices",
+      "vercel-composition-patterns": "skills/composition-patterns",
+      "web-design-guidelines": "skills/web-design-guidelines"
+    }
+  },
+  "go": {
+    "version": "go1.27.3",
+    "license": "BSD-3-Clause",
+    "archives": {
+      "linux-amd64": {
+        "filename": "go1.27.3.linux-amd64.tar.gz",
+        "sha256": "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40",
+        "size": 70588678
+      },
+      "linux-arm64": {
+        "filename": "go1.27.3.linux-arm64.tar.gz",
+        "sha256": "a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49",
+        "size": 67076044
+      }
+    },
+    "license_sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+    "guidelines_cli": {
+      "version": "v0.1.1",
+      "repo": "JetBrains/go-modern-guidelines",
+      "commit": "937827b86eeff98f45150ce00236bc34a30ed20f",
+      "module_sum": "h1:2veNbW6cos/5GqGwRfN52KSW0QKUHVnwhptJo/DExQI=",
+      "compiler": "go1.27.3",
+      "build_flags": [
+        "-trimpath",
+        "CGO_ENABLED=0"
+      ],
+      "binaries": {
+        "linux-arm64": {
+          "path": "use-modern-go/runtime/go-modern-guidelines-linux-arm64",
+          "sha256": "76fe9d603f0be59f81a3f0c8088558f439c4b01eedcf0c029dc930d281d9c6e5"
+        },
+        "linux-amd64": {
+          "path": "use-modern-go/runtime/go-modern-guidelines-linux-amd64",
+          "sha256": "361d2350eb7c949fe2bdfc970155ba2352e85aeb5a2dc09ba8ceb9e085050273"
+        }
+      },
+      "licenses": {
+        "use-modern-go/runtime/licenses/JetBrains-LICENSE": "304264c63c5fb4cf3bc22746f1fd8958fc34f69cf1a389f7c7b2182985691bfd",
+        "use-modern-go/runtime/licenses/Go-LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+        "use-modern-go/runtime/licenses/Go-PATENTS": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc",
+        "use-modern-go/runtime/licenses/x-mod-LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+        "use-modern-go/runtime/licenses/x-mod-PATENTS": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc"
+      },
+      "dependency": {
+        "module": "golang.org/x/mod",
+        "version": "v0.37.0",
+        "commit": "deb1dfcdb7c7fd98fb5afddc3e95dd36d5880874",
+        "sum": "h1:vF1DjpVEshcIqoEaauuHebaLk1O1forxjxBaVn884JQ=",
+        "license": "BSD-3-Clause"
+      }
+    }
+  }
+}

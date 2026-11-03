@@ -46,6 +46,20 @@ class InstallerTest(unittest.TestCase):
         self.assertEqual(result.stdout.strip(), str(self.install / 'agent-browser'))
         self.assertTrue((self.install / 'agent-browser').stat().st_mode & 0o111)
 
+    def test_bundled_release_installs_without_network(self):
+        scripts = self.root / 'scripts'
+        scripts.mkdir()
+        self.script = scripts / 'installer.sh'
+        self.script.write_text(SOURCE.read_text().replace('/tmp/ab', str(self.install)))
+        bundled = self.bin / 'agent-browser-linux-x64'
+        bundled.write_bytes(b'bundled release')
+
+        result = self.run_script(MOCK_CURL='fail')
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((self.install / 'agent-browser').read_bytes(), bundled.read_bytes())
+        self.assertEqual(result.stdout.strip(), str(self.install / 'agent-browser'))
+
     def test_arm64_selects_its_digest(self):
         result = self.run_script(MOCK_ARCH='aarch64', MOCK_HASH=HASHES['aarch64'])
         self.assertEqual(result.returncode, 0, result.stderr)

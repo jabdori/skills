@@ -10,6 +10,9 @@ from pathlib import Path
 
 
 CODE_EXTENSIONS = {'.py', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.go', '.rs', '.java', '.rb', '.sh', '.html', '.css'}
+WEB_EXTENSIONS = {'.html', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.vue', '.svelte'}
+LINE_REFERENCE = re.compile(
+    r'(?<![\w/])((?:\.\.?/)?(?:[\w.-]+/)*[\w.-]+\.(?:py|go|rs|java|rb|sh|js|mjs|cjs|ts|tsx|jsx|html|css|vue|svelte|md|json|csv)):(\d+)\b')
 LARGE_BYTES = 5 * 1024 * 1024
 
 
@@ -150,6 +153,68 @@ def file_warnings(root, changed):
     return warnings
 
 
+def new_tab_warnings(root):
+    pattern = re.compile(r'''\btarget\s*=\s*["']_blank["']|\bwindow\s*\.\s*open\s*\(''', re.I)
+    warnings = set()
+    excluded = {'.git', '.agents', '.codex', '.local', '.venv', 'node_modules', 'vendor', 'docs', '__pycache__'}
+    for current, dirs, files in os.walk(root):
+        dirs[:] = [name for name in dirs if name not in excluded]
+        for name in files:
+            path = Path(current) / name
+            if path.suffix.lower() not in WEB_EXTENSIONS or path.is_symlink():
+                continue
+            try:
+                with path.open(encoding='utf-8', errors='replace') as source:
+                    for number, line in enumerate(source, 1):
+                        if pattern.search(line):
+                            warnings.add(f'새 탭이 열려 전체화면이 풀릴 수 있음: {path.relative_to(root)}:{number}')
+            except OSError:
+                continue
+    return warnings
+
+
+def document_reference_warnings(root):
+    docs = root / 'docs'
+    if not docs.is_dir():
+        return set()
+    warnings = set()
+    lines_by_file = {}
+    commits = {}
+
+    def last_commit(path):
+        relative = path.relative_to(root).as_posix()
+        if relative not in commits:
+            result = git(root, 'log', '-1', '--format=%H', '--', relative)
+            commits[relative] = result.stdout.strip().decode('ascii') if result.returncode == 0 else ''
+        return commits[relative]
+
+    for document in docs.rglob('*.md'):
+        if document.is_symlink():
+            continue
+        relative_doc = document.relative_to(root).as_posix()
+        for number, line in enumerate(document.read_text(encoding='utf-8', errors='replace').splitlines(), 1):
+            for match in LINE_REFERENCE.finditer(line):
+                name, target_line = match.group(1), int(match.group(2))
+                raw = Path(name)
+                paths = ((document.parent / raw, root / raw) if name.startswith('.')
+                         else (root / raw, document.parent / raw))
+                target = next((path.resolve() for path in paths
+                               if path.is_file() and path.resolve().is_relative_to(root)), None)
+                if target is None:
+                    warnings.add(f'파일:줄 근거의 파일 없음: {relative_doc}:{number} → {name}:{target_line}')
+                    continue
+                if target not in lines_by_file:
+                    lines_by_file[target] = len(target.read_text(encoding='utf-8', errors='replace').splitlines())
+                if target_line < 1 or target_line > lines_by_file[target]:
+                    warnings.add(f'파일:줄 근거의 줄 없음: {relative_doc}:{number} → {name}:{target_line}')
+                    continue
+                document_sha, target_sha = last_commit(document), last_commit(target)
+                if document_sha and target_sha and document_sha != target_sha:
+                    if git(root, 'merge-base', '--is-ancestor', document_sha, target_sha).returncode == 0:
+                        warnings.add(f'낡았을 수 있음: {relative_doc} → {target.relative_to(root)}')
+    return warnings
+
+
 def document_warnings(root, changed, document):
     if document is None:
         document = next((root / path for path in ('docs/DECISIONS.md', 'DECISIONS.md')
@@ -238,6 +303,37 @@ def acceptance_warnings(root, path, required):
     return warnings
 
 
+def spec_warnings(root, required):
+    path = root / 'docs/spec.md'
+    if not path.is_file():
+        return {'구현 명세 없음: docs/spec.md'} if required else set()
+    try:
+        content = path.read_text(encoding='utf-8')
+    except (OSError, UnicodeError):
+        return {'구현 명세를 읽을 수 없습니다: docs/spec.md'}
+    heading = re.search(r'^##\s+작업 단위\s*$', content, re.M)
+    if not heading:
+        return {'구현 명세에 작업 단위 표 없음: docs/spec.md'}
+    section = re.split(r'^##\s+', content[heading.end():], maxsplit=1, flags=re.M)[0]
+    warnings = set()
+    rows = 0
+    for line in section.splitlines():
+        if not line.startswith('|'):
+            continue
+        cells = [cell.strip() for cell in line.strip('|').split('|')]
+        if len(cells) < 6 or cells[0] == '번호' or re.fullmatch(r'[-: ]+', cells[0]):
+            continue
+        rows += 1
+        status = cells[5]
+        if status in {'예정', '진행'}:
+            warnings.add(f'작업 단위 {status}: {cells[0]} {cells[1]}')
+        elif status not in {'완료', '미룸'}:
+            warnings.add(f'작업 단위 상태 확인 필요: {cells[0]} {cells[1]} ({status})')
+    if not rows:
+        warnings.add('구현 명세에 작업 단위 행 없음: docs/spec.md')
+    return warnings
+
+
 def own_document_warnings(root):
     # 응시자가 직접 쓰는 제출 문서가 없거나 양식 빈칸이 남았는지 확인합니다(README가 요구한 경우만).
     readme = root / 'README.md'
@@ -305,6 +401,10 @@ def main():
         return 1
     root = Path(os.fsdecode(result.stdout.strip())).resolve()
     schema_present = any((root / name).is_file() for name in ('EXPORT_SCHEMA.md', 'API_SCHEMA.md', 'openapi.yaml', 'openapi.yml', 'openapi.json'))
+    readme = root / 'README.md'
+    readme_text = readme.read_text(encoding='utf-8', errors='replace') if readme.is_file() else ''
+    spec_required = (schema_present or (root / 'docs/task/start-path.md').is_file()
+                     or bool(re.search(r'^##\s+요구사항\b', readme_text, re.M)))
     try:
         base = base_commit(root, args.base)
         test_failed = run_test(root, args.test) if args.test else False
@@ -325,7 +425,9 @@ def main():
     document_issues, checked = document_warnings(root, changed, args.decisions)
     if checked is not None:
         print(f'결정 문서 대조: 코드 {checked}개')
-    warnings = (file_warnings(root, changed) | document_issues | protected_issues | commit_issues
+    warnings = (file_warnings(root, changed) | new_tab_warnings(root) | document_reference_warnings(root)
+                | document_issues | protected_issues | commit_issues
+                | spec_warnings(root, spec_required)
                 | acceptance_warnings(root, args.acceptance, schema_present) | mixed_document_warnings(root) | own_document_warnings(root))
     if schema_present and not args.contract:
         warnings.add('계약 검사기 미실행: --contract 명령을 지정하세요.')

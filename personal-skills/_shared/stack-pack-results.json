@@ -1,0 +1,238 @@
+{
+  "image": "cofa-practice:local",
+  "image_id_and_arch": "sha256:808ec62ace0db9f0b726a7b66a3f5b20875cb7faea210a3c7f44ad1c8693c632 arm64",
+  "recognition_check": "공식 사용자 발견 경로의 SKILL.md와 앞부분 이름·설명·소유자만 확인; 모델 호출 없음",
+  "results": [
+    {
+      "pack": "common",
+      "mode": "cold-online-auto",
+      "seconds": 0.161,
+      "exit_code": 0,
+      "stdout": "스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills\n설치 완료: common (0.007초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "common",
+      "mode": "cold-offline-explicit",
+      "seconds": 0.082,
+      "exit_code": 0,
+      "stdout": "스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills\n설치 완료: common (0.002초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "go",
+      "mode": "cold-online-auto",
+      "seconds": 5.135,
+      "exit_code": 0,
+      "stdout": "스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills, use-modern-go\nGo: go1.27.3 → /home/user/.local/go\n현재 셸에서 실행: export PATH=\"$HOME/.local/go/bin:$PATH\"\n도구 체인 자동 변경 방지: export GOTOOLCHAIN=local\n설치 완료: go (5.037초)\n",
+      "stderr": "",
+      "go_runtime_and_guidelines_ok": true,
+      "placement": {
+        "skills": [
+          "find-skills",
+          "use-modern-go"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "go",
+      "mode": "cold-offline-explicit",
+      "seconds": 0.093,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Go 설치 실패 — 이미 설치된 Node.js 22나 Python 3.11 스택을 고려\n",
+      "placement": {
+        "skills": [],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "react",
+      "mode": "cold-online-auto",
+      "seconds": 0.759,
+      "exit_code": 0,
+      "stdout": "v22.23.2\n스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills, shadcn, vercel-composition-patterns, vercel-react-best-practices, web-design-guidelines\n설치 완료: react (0.656초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills",
+          "shadcn",
+          "vercel-composition-patterns",
+          "vercel-react-best-practices",
+          "web-design-guidelines"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "react",
+      "mode": "cold-offline-explicit",
+      "seconds": 0.089,
+      "exit_code": 1,
+      "stdout": "v22.23.2\n",
+      "stderr": "설치 실패: 오프라인: React 원격 스킬 캐시가 없습니다. 온라인에서 react 팩을 한 번 설치해야 합니다.\n",
+      "placement": {
+        "skills": [],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "python",
+      "mode": "cold-online-auto",
+      "seconds": 0.09,
+      "exit_code": 0,
+      "stdout": "Python 3.11.2\n스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills\n설치 완료: python (0.002초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "python",
+      "mode": "cold-offline-explicit",
+      "seconds": 0.11,
+      "exit_code": 0,
+      "stdout": "Python 3.11.2\n스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills\n설치 완료: python (0.003초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "node",
+      "mode": "cold-online-auto",
+      "seconds": 0.115,
+      "exit_code": 0,
+      "stdout": "v22.23.2\n스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills\n설치 완료: node (0.005초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "node",
+      "mode": "cold-offline-explicit",
+      "seconds": 0.116,
+      "exit_code": 0,
+      "stdout": "v22.23.2\n스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills\n설치 완료: node (0.004초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "go",
+      "mode": "cold-offline-auto",
+      "seconds": 0.109,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Go 설치 실패 — 이미 설치된 Node.js 22나 Python 3.11 스택을 고려\n",
+      "placement": {
+        "skills": [],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "react",
+      "mode": "cold-offline-auto",
+      "seconds": 0.093,
+      "exit_code": 1,
+      "stdout": "v22.23.2\n",
+      "stderr": "설치 실패: 고정 커밋 다운로드 실패: vercel-labs/agent-skills@1a2c79d4e6c4\n",
+      "placement": {
+        "skills": [],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "go",
+      "mode": "warm-offline-reinstall",
+      "seconds": 2.868,
+      "exit_code": 0,
+      "stdout": "스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills, use-modern-go\nGo: go1.27.3 → /home/user/.local/go\n현재 셸에서 실행: export PATH=\"$HOME/.local/go/bin:$PATH\"\n도구 체인 자동 변경 방지: export GOTOOLCHAIN=local\n설치 완료: go (2.774초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills",
+          "use-modern-go"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    },
+    {
+      "pack": "react",
+      "mode": "warm-offline-reinstall",
+      "seconds": 0.101,
+      "exit_code": 0,
+      "stdout": "v22.23.2\n스킬 설치 위치: /home/user/.agents/skills\n스킬: find-skills, shadcn, vercel-composition-patterns, vercel-react-best-practices, web-design-guidelines\n설치 완료: react (0.021초)\n",
+      "stderr": "",
+      "placement": {
+        "skills": [
+          "find-skills",
+          "shadcn",
+          "vercel-composition-patterns",
+          "vercel-react-best-practices",
+          "web-design-guidelines"
+        ],
+        "codex": "codex-cli 0.163.0",
+        "uid": 1001,
+        "config_untouched": true
+      }
+    }
+  ],
+  "unit_tests": 16,
+  "go_sdk_bundled": false,
+  "vendor_bytes": 9944088,
+  "vendor_disk_usage": "9.6MiB"
+}

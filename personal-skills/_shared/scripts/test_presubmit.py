@@ -34,6 +34,15 @@ class PresubmitTest(unittest.TestCase):
         return subprocess.run([sys.executable, str(SCRIPT), *args], cwd=self.root,
                               text=True, capture_output=True)
 
+    def write_complete_spec(self):
+        docs = self.root / 'docs'
+        docs.mkdir(exist_ok=True)
+        (docs / 'spec.md').write_text(
+            '# 구현 명세\n## 작업 단위\n'
+            '| 번호 | 제목 | 막힘 | 이 조각이 되게 하는 동작 | 확인 방법 | 상태 |\n'
+            '|---|---|---|---|---|---|\n'
+            '| 1 | 조회 | 없음 | 결과 표시 | 요청 검사 | 완료 |\n')
+
     def test_reports_changes_artifacts_and_unmentioned_code_without_writing(self):
         (self.root / 'app.py').write_text('print("changed")\n')
         (self.root / 'obsolete.txt').unlink()
@@ -217,7 +226,8 @@ class PresubmitTest(unittest.TestCase):
         docs = self.root / 'docs/requirements'
         docs.mkdir(parents=True)
         (docs / 'acceptance.md').write_text('# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 검사해서 통과함 | test_query |\n')
-        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/requirements/acceptance.md')
+        self.write_complete_spec()
+        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/requirements/acceptance.md', 'docs/spec.md')
         self.run_git('commit', '-qm', 'docs: 인수 근거를 정리함')
         result = self.check_script('--contract', f'{sys.executable} -c "pass"')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -229,7 +239,8 @@ class PresubmitTest(unittest.TestCase):
         docs = self.root / 'docs'
         docs.mkdir()
         (docs / 'DECISIONS.md').write_text('# 결정\n## 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 통과 | test_query |\n')
-        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/DECISIONS.md')
+        self.write_complete_spec()
+        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/DECISIONS.md', 'docs/spec.md')
         self.run_git('commit', '-qm', 'docs: 인수 구역을 정리함')
         result = self.check_script('--contract', f'{sys.executable} -c "pass"')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -253,7 +264,111 @@ class PresubmitTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn('인수 점검표 없음', result.stdout)
         self.assertIn('계약 검사기 미실행', result.stdout)
+        self.assertIn('구현 명세 없음: docs/spec.md', result.stdout)
         self.assertFalse((self.root / '인수점검표.md').exists())
+
+    def test_spec_pending_units_warn_without_writing(self):
+        docs = self.root / 'docs'
+        docs.mkdir()
+        spec = docs / 'spec.md'
+        content = ('# 구현 명세\n## 작업 단위\n'
+                   '| 번호 | 제목 | 막힘 | 이 조각이 되게 하는 동작 | 확인 방법 | 상태 |\n'
+                   '|---|---|---|---|---|---|\n'
+                   '| 1 | 시작 | 없음 | 조회 | 요청 검사 | 완료 |\n'
+                   '| 2 | 저장 | 1 | 재시작 | 재시작 검사 | 진행 |\n'
+                   '| 3 | 화면 | 2 | 표시 | 화면 검사 | 예정 |\n'
+                   '| 4 | 부가 | 3 | 통계 | 보류 | 미룸 |\n')
+        spec.write_text(content)
+        self.run_git('add', 'docs/spec.md')
+        self.run_git('commit', '-qm', 'docs: 작업 단위를 기록함')
+
+        result = self.check_script()
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('작업 단위 진행: 2 저장', result.stdout)
+        self.assertIn('작업 단위 예정: 3 화면', result.stdout)
+        self.assertNotIn('작업 단위 미룸: 4 부가', result.stdout)
+        self.assertEqual(spec.read_text(), content)
+
+    def test_spec_completed_or_deferred_units_do_not_warn(self):
+        docs = self.root / 'docs'
+        docs.mkdir()
+        (docs / 'spec.md').write_text(
+            '# 구현 명세\n## 작업 단위\n'
+            '| 번호 | 제목 | 막힘 | 이 조각이 되게 하는 동작 | 확인 방법 | 상태 |\n'
+            '|---|---|---|---|---|---|\n'
+            '| 1 | 시작 | 없음 | 조회 | 요청 검사 | 완료 |\n'
+            '| 2 | 부가 | 1 | 통계 | 보류 | 미룸 |\n')
+        self.run_git('add', 'docs/spec.md')
+        self.run_git('commit', '-qm', 'docs: 완료 상태를 기록함')
+
+        result = self.check_script()
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn('작업 단위', result.stdout)
+
+    def test_new_tab_source_code_warns_with_locations(self):
+        (self.root / 'app.js').write_text('const open = () => window.open("/report");\n')
+        (self.root / 'page.html').write_text('<a target="_blank" href="/report">보고서</a>\n')
+        self.run_git('add', 'app.js', 'page.html')
+        self.run_git('commit', '-qm', 'feat: 화면 링크를 추가함')
+
+        result = self.check_script()
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('새 탭이 열려 전체화면이 풀릴 수 있음: app.js:1', result.stdout)
+        self.assertIn('새 탭이 열려 전체화면이 풀릴 수 있음: page.html:1', result.stdout)
+
+    def test_new_tab_scan_skips_dependencies_and_documentation(self):
+        for directory in ('node_modules', '.local', '.codex', 'vendor', 'docs'):
+            folder = self.root / directory
+            folder.mkdir()
+            (folder / 'sample.js').write_text('window.open("/report")\n')
+
+        result = self.check_script()
+
+        self.assertNotIn('새 탭이 열려 전체화면이 풀릴 수 있음', result.stdout)
+
+    def test_document_file_line_references_warn_when_missing(self):
+        docs = self.root / 'docs/explain'
+        docs.mkdir(parents=True)
+        (docs / 'code-map.md').write_text('# 코드 지도\n확인: `app.py:99`와 `missing.py:2`\n')
+        self.run_git('add', 'docs/explain/code-map.md')
+        self.run_git('commit', '-qm', 'docs: 코드 위치를 기록함')
+
+        result = self.check_script()
+
+        self.assertIn('파일:줄 근거의 줄 없음: docs/explain/code-map.md:2 → app.py:99', result.stdout)
+        self.assertIn('파일:줄 근거의 파일 없음: docs/explain/code-map.md:2 → missing.py:2', result.stdout)
+
+    def test_document_reference_warns_when_code_changed_after_document(self):
+        docs = self.root / 'docs/explain'
+        docs.mkdir(parents=True)
+        note = docs / 'code-map.md'
+        note.write_text('# 코드 지도\n확인: `app.py:1`\n')
+        self.run_git('add', 'docs/explain/code-map.md')
+        self.run_git('commit', '-qm', 'docs: 코드 근거를 기록함')
+        (self.root / 'app.py').write_text('print("changed")\n')
+        self.run_git('add', 'app.py')
+        self.run_git('commit', '-qm', 'fix: 출력 값을 바꿈')
+
+        stale = self.check_script()
+        self.assertIn('낡았을 수 있음: docs/explain/code-map.md → app.py', stale.stdout)
+
+        note.write_text('# 코드 지도\n변경 후 확인: `app.py:1`\n')
+        self.run_git('add', 'docs/explain/code-map.md')
+        self.run_git('commit', '-qm', 'docs: 코드 근거를 다시 확인함')
+        current = self.check_script()
+        self.assertNotIn('낡았을 수 있음: docs/explain/code-map.md → app.py', current.stdout)
+
+    def test_task_readme_without_spec_warns(self):
+        (self.root / 'README.md').write_text('# 과제\n## 요구사항\n1. 조회\n')
+        self.run_git('add', 'README.md')
+        self.run_git('commit', '-qm', 'docs: 요구를 기록함')
+
+        result = self.check_script()
+
+        self.assertIn('구현 명세 없음: docs/spec.md', result.stdout)
 
     def test_own_submission_docs_missing_or_blank_warn(self):
         (self.root / 'README.md').write_text('# 과제 안내\nHOW_TO_RUN.md와 AI_COLLABORATION.md를 작성하세요.\n')
@@ -313,7 +428,8 @@ class PresubmitTest(unittest.TestCase):
             '# 결정\n## 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n'
             '|---|---|---|---|\n| 1 조회 | 요청 검사 | 통과 | test_api |\n'
             '## 답안 재료\n| 이 문장은 표가 아닙니다 |\n')
-        self.run_git('add', 'API_SCHEMA.md', 'DECISIONS.md')
+        self.write_complete_spec()
+        self.run_git('add', 'API_SCHEMA.md', 'DECISIONS.md', 'docs/spec.md')
         self.run_git('commit', '-qm', 'docs: API 인수 기준을 기록함')
         failed = self.check_script('--acceptance', 'DECISIONS.md',
                                    '--contract', f'{sys.executable} -c "import sys; sys.exit(4)"')
