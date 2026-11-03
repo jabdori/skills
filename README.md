@@ -10,7 +10,7 @@ Codex용 작업 절차 스킬과 공용 자료(`_shared`)입니다. 업무 담�
 git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && bash /tmp/s/install.sh
 ```
 
-`install.sh`는 스킬과 공용 자료 `_shared`(지침·템플릿·점검 스크립트)를 `~/.agents/skills`에 함께 복사하고 빠진 것이 없는지 확인합니다. Codex 설정은 바꾸지 않습니다.
+`install.sh`는 스킬과 공용 자료 `_shared`(지침·템플릿·점검 스크립트)를 `~/.agents/skills`에 함께 복사하고 빠진 것이 없는지 확인합니다. 리눅스에서는 화면 확인 도구 agent-browser v0.39.0도 저장소에 함께 넣은 실행 파일(`_shared/bin/`, SHA-256 검증, Apache-2.0 — `LICENSE-agent-browser`)로 `/tmp/ab/agent-browser`에 설치합니다. 네트워크가 없어도 됩니다. Codex 설정은 바꾸지 않습니다.
 
 Codex에게 "깃허브에서 jabdori/skills 설치해"라고 해도 됩니다. 이때는 내장 `skill-installer`가 `~/.codex/skills`에 설치하는데, **`_shared`(shared-resources)까지 함께 설치됐는지** 확인하세요. 빠지면 다른 스킬의 링크가 깨집니다.
 

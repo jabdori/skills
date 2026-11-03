@@ -19,6 +19,19 @@ esac
 
 mkdir -p /tmp/ab
 target=/tmp/ab/agent-browser
+
+# 스킬 저장소에 함께 넣은 실행 파일을 먼저 씁니다(네트워크 없이 설치, 같은 SHA-256 검증).
+bundled="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/../bin/$asset"
+if [[ -f "$bundled" ]] && command -v sha256sum >/dev/null 2>&1; then
+  actual=$(sha256sum "$bundled"); actual=${actual%% *}
+  if [[ "$actual" == "$expected" ]] && cp "$bundled" "$target" && chmod +x "$target"; then
+    printf '%s\n' "$target"
+    exit 0
+  fi
+  rm -f "$target"
+  printf '함께 넣은 실행 파일의 SHA-256이 맞지 않아 다운로드를 시도합니다.\n' >&2
+fi
+
 url="https://github.com/vercel-labs/agent-browser/releases/download/v0.39.0/$asset"
 if curl --fail --location --silent --show-error --connect-timeout 10 --max-time 90 --output "$target" "$url"; then
   if ! command -v sha256sum >/dev/null 2>&1; then
