@@ -6,7 +6,7 @@ dest="${1:-$HOME/.agents/skills}"
 mkdir -p "$dest"
 cp -R "$src"/. "$dest"/
 missing=0
-for need in _shared/personal-workflow.md _shared/templates _shared/scripts/presubmit.py exam-start/SKILL.md exam-start/rules.md; do
+for need in _shared/personal-workflow.md _shared/templates/data-map.md _shared/scripts/presubmit.py exam-start/SKILL.md exam-start/rules.md; do
   [[ -e "$dest/$need" ]] || { echo "누락: $dest/$need" >&2; missing=1; }
 done
 [[ $missing == 0 ]] || exit 1

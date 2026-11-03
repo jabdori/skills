@@ -154,6 +154,8 @@ def document_warnings(root, changed, document):
     if document is None:
         document = next((root / path for path in ('docs/DECISIONS.md', 'DECISIONS.md')
                          if (root / path).is_file()), None)
+        if (root / 'docs/adr').is_dir():
+            document = root / 'docs/adr'
         if document is None:
             return set(), None
         document = document.resolve()
@@ -161,24 +163,39 @@ def document_warnings(root, changed, document):
         document = (root / document).resolve()
     if not document.is_relative_to(root):
         return {'결정 문서는 작업 폴더 안에 있어야 합니다.'}, None
-    if not document.is_file():
+    if not document.is_file() and not document.is_dir():
         return {f'결정 문서를 찾을 수 없습니다: {document.relative_to(root)}'}, None
+    code_files = [name for _, name in changed if Path(name).suffix.lower() in CODE_EXTENSIONS]
     try:
-        content = document.read_text(encoding='utf-8')
+        if document.is_dir():
+            records = sorted(document.glob('[0-9][0-9][0-9][0-9]-*.md'))
+            if not records:
+                return {'ADR 결정 파일 없음: docs/adr/에 번호가 붙은 결정 기록을 확인하세요.'}, None
+            for record in records:
+                record.read_text(encoding='utf-8')
+            code_map = root / 'docs/explain/code-map.md'
+            if code_files and not code_map.is_file():
+                return {'코드 지도 없음: docs/explain/code-map.md에 변경 파일의 역할을 적으세요.'}, len(code_files)
+            content = code_map.read_text(encoding='utf-8') if code_map.is_file() else ''
+            label = '코드 지도'
+        else:
+            content = document.read_text(encoding='utf-8')
+            label = '결정 문서'
     except (OSError, UnicodeError):
         return {f'결정 문서를 읽을 수 없습니다: {document.relative_to(root)}'}, None
-    code_files = [name for _, name in changed if Path(name).suffix.lower() in CODE_EXTENSIONS]
-    return ({f'결정 문서에 언급되지 않은 코드: {name}' for name in code_files
+    return ({f'{label}에 언급되지 않은 코드: {name}' for name in code_files
              if Path(name).name not in content}, len(code_files))
 
 
 def acceptance_warnings(root, path, required):
     if path is None:
-        for candidate in ('docs/인수점검표.md', 'docs/DECISIONS.md', '인수점검표.md', 'DECISIONS.md'):
+        # 이전 위치는 하위 호환으로만 읽습니다.
+        for candidate in ('docs/requirements/acceptance.md', 'docs/인수점검표.md',
+                          'docs/DECISIONS.md', '인수점검표.md', 'DECISIONS.md'):
             file = root / candidate
             if not file.is_file():
                 continue
-            if file.name == '인수점검표.md':
+            if file.name in {'acceptance.md', '인수점검표.md'}:
                 path = Path(candidate)
                 break
             try:
@@ -188,7 +205,7 @@ def acceptance_warnings(root, path, required):
             except (OSError, UnicodeError):
                 continue
         if path is None:
-            path = Path('docs/인수점검표.md')
+            path = Path('docs/requirements/acceptance.md')
     if not required and not (root / path).exists():
         return set()
     document = (root / path).resolve()
@@ -231,9 +248,16 @@ def own_document_warnings(root):
             continue
         path = root / name
         if not path.is_file():
-            warnings.add(f'{name} 없음: 직접 작성할 제출 문서입니다(재료는 docs/제출문서_재료.md).')
+            warnings.add(f'{name} 없음: 직접 작성할 제출 문서입니다(재료는 docs/submission/notes.md).')
         elif '(답변)' in path.read_text(encoding='utf-8', errors='replace'):
             warnings.add(f'{name}에 양식 빈칸 "(답변)"이 남아 있음: 직접 채우세요.')
+    # README가 이전 이름의 결정 제출 파일을 요구하면 ADR 목록으로 연결합니다.
+    if 'DECISIONS.md' in required:
+        legacy = root / 'DECISIONS.md'
+        if not legacy.is_file():
+            warnings.add('DECISIONS.md 없음: README가 지정한 제출 파일입니다.')
+        elif 'docs/adr/' not in legacy.read_text(encoding='utf-8', errors='replace'):
+            warnings.add('DECISIONS.md에 ADR 링크 없음: docs/adr/ 결정 기록을 연결하세요.')
     return warnings
 
 
@@ -248,7 +272,7 @@ def mixed_document_warnings(root):
         text = path.read_text(encoding='utf-8', errors='replace')
         for marker, label in markers:
             if marker in text:
-                warnings.add(f'{name}에 {label}가 섞임: docs/로 옮기고 링크만 남기세요(README가 위치를 명시한 경우는 무시).')
+                warnings.add(f'{name}에 {label}가 섞임: docs/requirements/로 옮기고 링크만 남기세요(README가 위치를 명시한 경우는 무시).')
     return warnings
 
 
@@ -269,8 +293,8 @@ def main():
     parser = argparse.ArgumentParser(description='제출 전 Git 변경·생성물·결정 문서를 읽기 전용으로 확인합니다.')
     parser.add_argument('--test', help='실행할 검사 명령. 검사 자체의 파일 변경은 막지 않습니다.')
     parser.add_argument('--contract', help='지정 내보내기·API 형식과 숫자 운영 규칙을 확인할 계약 검사 명령.')
-    parser.add_argument('--acceptance', type=Path, help='인수 점검표 경로. 기본값은 docs/인수점검표.md, 없으면 루트 또는 결정 문서 구역입니다.')
-    parser.add_argument('--decisions', type=Path, help='결정 문서 경로. 기본값은 docs/DECISIONS.md, 없으면 루트 DECISIONS.md입니다.')
+    parser.add_argument('--acceptance', type=Path, help='인수 점검표 경로. 기본값은 docs/requirements/acceptance.md이며 이전 위치도 읽습니다.')
+    parser.add_argument('--decisions', type=Path, help='결정 기록 경로. 기본값은 docs/adr/이며 이전 DECISIONS.md도 읽습니다.')
     parser.add_argument('--base', help='비교 기준 커밋. 기본값은 현재 이력의 최초 커밋입니다.')
     parser.add_argument('--protect', action='append', default=[], metavar='FILE', help='수정 금지 파일(반복 지정 가능). README.md는 기본 보호합니다.')
     args = parser.parse_args()

@@ -21,11 +21,13 @@ description: 코드 변경·PR 검토와 완료 확인을 맡는 개인 스킬. 
 
 화면 과제의 실제 상호작용을 확인할 때는 [원문·화면 확인 도구](../_shared/agent-browser.md)의 자기 화면 흐름과 사용 금지 경계를 따릅니다.
 
-업무 요구의 판정 결과는 기록 수정이 허용된 경우 `docs/요구근거.md`의 [요구 근거표](../_shared/templates/요구근거.md)에 [쉬운 말 기준](../_shared/personal-workflow.md#쉬운-말-기준)으로 씁니다. `충족/가정 의존/미충족`의 뜻도 상태 칸에 `만들고 검사함 / 확인하지 않은 조건에 기대어 동작함 / 요구대로 동작하지 않음`처럼 풀고, 읽기 전용이면 응답으로만 알립니다.
+업무 요구의 판정 결과는 기록 수정이 허용된 경우 `docs/requirements/evidence.md`의 [요구 근거표](../_shared/templates/requirements-evidence.md)에 [쉬운 말 기준](../_shared/personal-workflow.md#쉬운-말-기준)으로 씁니다. `충족/가정 의존/미충족`의 뜻도 상태 칸에 `만들고 검사함 / 확인하지 않은 조건에 기대어 동작함 / 요구대로 동작하지 않음`처럼 풀고, 읽기 전용이면 응답으로만 알립니다.
 
-같은 판정으로 `docs/인수점검표.md`의 [인수 점검표](../_shared/templates/인수점검표.md)에 요구사항별 쉬운 상태·원문 위치·검사 근거를 갱신하고, 읽기 전용이면 파일 대신 응답에 차이를 적습니다.
+같은 판정으로 `docs/requirements/acceptance.md`의 [인수 점검표](../_shared/templates/acceptance.md)에 요구사항별 쉬운 상태·원문 위치·검사 근거를 갱신하고, 읽기 전용이면 파일 대신 응답에 차이를 적습니다.
 
-제출 전에는 필요할 때 작업 폴더에서 `python3 <AGENTS.md의 스킬 공용 자료 절대 경로>/scripts/presubmit.py`로 변경·생성물·결정 문서를 확인합니다. 시작 SHA가 최초 커밋과 다르면 `--base`, 보호 파일은 `--protect`, 검사는 `--test`, 지정 형식의 계약 검사는 `--contract "명령"`, 점검표가 다른 위치에 있으면 `--acceptance 경로`, 다른 결정 문서는 `--decisions 경로`로 지정합니다. 스크립트는 파일을 고치지 않지만 검사 명령의 부작용은 그대로이며 작은 수정에는 이 점검을 추가하지 않습니다.
+`docs/adr/README.md`의 번호·상태와 각 ADR의 선택·이유·검사가 실제 코드에 맞는지도 대조하고, 대체된 결정이 현재 선택처럼 남아 있으면 지적합니다.
+
+제출 전에는 필요할 때 작업 폴더에서 `python3 <docs/task/start-path.md에 기록한 스킬 공용 자료 경로>/scripts/presubmit.py`로 변경·생성물·[ADR 목록](../_shared/personal-workflow.md#문서-지도)을 확인합니다. 시작 SHA가 최초 커밋과 다르면 `docs/task/start-path.md`의 값으로 `--base`를, 보호 파일은 `--protect`, 검사는 `--test`, 계약 검사는 `--contract "명령"`으로 지정합니다. 기본 결정 경로는 `docs/adr/`이고 README가 다른 제출 파일을 요구하면 `--decisions 경로`로 지정합니다. 스크립트는 파일을 고치지 않지만 검사 명령의 부작용은 그대로이며 작은 수정에는 추가하지 않습니다.
 
 검토 결과에는 [로컬 커밋 규칙](../_shared/personal-workflow.md#로컬-커밋)에 맞춰 커밋되지 않은 관련 변경을 지적하되, 읽기 전용 검토라면 직접 커밋하지 않습니다.
 

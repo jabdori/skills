@@ -187,22 +187,37 @@ class PresubmitTest(unittest.TestCase):
     def test_docs_decision_document_takes_priority_over_legacy_root(self):
         (self.root / 'app.py').write_text('print("changed")\n')
         (self.root / 'DECISIONS.md').write_text('# 오래된 결정\n')
-        docs = self.root / 'docs'
-        docs.mkdir()
-        (docs / 'DECISIONS.md').write_text('app.py 변경 근거\n')
-        self.run_git('add', 'app.py', 'DECISIONS.md', 'docs/DECISIONS.md')
+        adr = self.root / 'docs/adr'
+        adr.mkdir(parents=True)
+        (adr / 'README.md').write_text('# 결정 목록\n')
+        (adr / '0001-save-state.md').write_text('# 저장 결정\n## 상태\n채택\n')
+        explain = self.root / 'docs/explain'
+        explain.mkdir()
+        (explain / 'code-map.md').write_text('# 코드 지도\napp.py 변경 근거\n')
+        self.run_git('add', 'app.py', 'DECISIONS.md', 'docs/adr', 'docs/explain/code-map.md')
         self.run_git('commit', '-qm', 'docs: 결정 위치를 정리함')
         result = self.check_script()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertNotIn('결정 문서에 언급되지 않은 코드', result.stdout)
+        self.assertNotIn('코드 지도에 언급되지 않은 코드', result.stdout)
+
+    def test_adr_without_code_map_warns_for_changed_code(self):
+        (self.root / 'app.py').write_text('print("changed")\n')
+        adr = self.root / 'docs/adr'
+        adr.mkdir(parents=True)
+        (adr / '0001-save-state.md').write_text('# 저장 결정\n')
+        self.run_git('add', 'app.py', 'docs/adr')
+        self.run_git('commit', '-qm', 'docs: 결정 기록을 남김')
+        result = self.check_script()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('코드 지도 없음', result.stdout)
 
     def test_docs_checklist_takes_priority_over_legacy_root(self):
         (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
         (self.root / '인수점검표.md').write_text('# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 부분 | 없음 |\n')
-        docs = self.root / 'docs'
-        docs.mkdir()
-        (docs / '인수점검표.md').write_text('# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 통과 | test_query |\n')
-        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/인수점검표.md')
+        docs = self.root / 'docs/requirements'
+        docs.mkdir(parents=True)
+        (docs / 'acceptance.md').write_text('# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n|---|---|---|---|\n| 1 조회 | 검사 | 검사해서 통과함 | test_query |\n')
+        self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md', 'docs/requirements/acceptance.md')
         self.run_git('commit', '-qm', 'docs: 인수 근거를 정리함')
         result = self.check_script('--contract', f'{sys.executable} -c "pass"')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -219,6 +234,16 @@ class PresubmitTest(unittest.TestCase):
         result = self.check_script('--contract', f'{sys.executable} -c "pass"')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertNotIn('인수 점검표 부분', result.stdout)
+
+    def test_adr_without_decision_record_warns(self):
+        adr = self.root / 'docs/adr'
+        adr.mkdir(parents=True)
+        (adr / 'README.md').write_text('# 결정 목록\n')
+        self.run_git('add', 'docs/adr/README.md')
+        self.run_git('commit', '-qm', 'docs: 결정 목록을 시작함')
+        result = self.check_script()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('ADR 결정 파일 없음', result.stdout)
 
     def test_schema_without_checklist_or_contract_warns_without_writing(self):
         (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
@@ -238,6 +263,22 @@ class PresubmitTest(unittest.TestCase):
         out = self.check_script().stdout
         self.assertIn('HOW_TO_RUN.md 없음', out)
         self.assertIn('AI_COLLABORATION.md에 양식 빈칸', out)
+
+    def test_readme_required_legacy_decisions_links_to_adr(self):
+        (self.root / 'README.md').write_text('# 과제 안내\nDECISIONS.md를 제출하세요.\n')
+        adr = self.root / 'docs/adr'
+        adr.mkdir(parents=True)
+        (adr / '0001-save-state.md').write_text('# 저장 결정\n')
+        self.run_git('add', 'README.md', 'docs/adr')
+        self.run_git('commit', '-qm', 'docs: 결정 제출 요구를 기록함')
+        missing = self.check_script()
+        self.assertIn('DECISIONS.md 없음', missing.stdout)
+        (self.root / 'DECISIONS.md').write_text('# 결정\n[결정 목록](docs/adr/README.md)\n')
+        self.run_git('add', 'DECISIONS.md')
+        self.run_git('commit', '-qm', 'docs: 결정 목록을 연결함')
+        linked = self.check_script()
+        self.assertNotIn('DECISIONS.md 없음', linked.stdout)
+        self.assertNotIn('DECISIONS.md에 ADR 링크 없음', linked.stdout)
 
     def test_working_tables_mixed_into_submission_doc_warn(self):
         (self.root / 'HOW_TO_RUN.md').write_text('# HOW_TO_RUN\n\n## 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n')
