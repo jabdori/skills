@@ -97,6 +97,30 @@ class DataProfileTest(unittest.TestCase):
                             and set(link['right_columns']) == {'date', 'shift'}
                             for link in report['relationships']))
 
+    def test_low_cardinality_code_and_semicolon_license_are_conditions(self):
+        self.csv('orders.csv', ['order_id', 'gas_code', 'work_date', 'shift', 'state'],
+                 [('O1', 'G-A', '2027-01-01', 'A', 'withdrawn'),
+                  ('O2', 'G-B', '2027-01-01', 'A', 'approved')])
+        self.csv('cabinets.csv', ['cabinet_id', 'gas_code'], [('W1', 'G-A'), ('W2', 'G-B')])
+        self.csv('crews.csv', ['crew_id', 'start_cabinet', 'gas_licenses', 'work_date', 'shift'],
+                 [('C1', 'W1', 'G-A', '2027-01-01', 'A'),
+                  ('C2', 'W2', 'G-A;G-B', '2027-01-01', 'A')])
+
+        report = profile_folder(self.folder)
+        conditions = report['conditions']
+        self.assertTrue(any({c['left_file'], c['right_file']} == {'orders.csv', 'cabinets.csv'}
+                            and c['operator'] == 'equals' and 'G-B' in c['shared_values']
+                            for c in conditions))
+        self.assertTrue(any(c['left_file'] == 'orders.csv' and c['right_file'] == 'crews.csv'
+                            and c['operator'] == 'contains' and 'G-B' in c['shared_values']
+                            for c in conditions))
+        self.assertFalse(any('gas_code' in c['left_columns'] or 'gas_code' in c['right_columns']
+                             for c in report['relationships']))
+        rows = {name: item['row'] for name, item in report['example']['rows'].items()}
+        self.assertEqual(report['example']['coverage'], 3)
+        self.assertEqual(rows['orders.csv']['gas_code'], rows['cabinets.csv']['gas_code'])
+        self.assertIn(rows['orders.csv']['gas_code'], rows['crews.csv']['gas_licenses'].split(';'))
+
 
 if __name__ == '__main__':
     unittest.main()

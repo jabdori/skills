@@ -12,6 +12,7 @@ from pathlib import Path
 CONTEXT = ('work_date', 'date', 'shift', 'period', 'day')
 POSITIVE = {'approved', 'active', 'open', 'valid', 'yes', 'true'}
 NEGATIVE = {'withdrawn', 'cancelled', 'canceled', 'closed', 'no', 'false'}
+CODE_WORDS = {'code', 'type', 'kind', 'category', 'license', 'licenses', 'skill', 'skills', 'class'}
 
 
 class Table:
@@ -66,6 +67,57 @@ def name_similarity(left, right):
     return len(a & b) / len(a | b) if a and b else 0.0
 
 
+def code_column(column):
+    return bool(set(column.split('_')) & CODE_WORDS)
+
+
+def code_values(table, column):
+    raw = table.values[column]
+    is_list = any(';' in value for value in raw)
+    values = {part.strip() for value in raw for part in value.split(';') if part.strip()}
+    if not 1 <= len(values) <= 24 or all(value.replace('.', '', 1).isdigit() for value in values):
+        return None
+    return values, is_list
+
+
+def conditions(tables):
+    found = []
+    names = sorted(tables)
+    for first, left_name in enumerate(names):
+        left = tables[left_name]
+        for right_name in names[first + 1:]:
+            right = tables[right_name]
+            for a in left.columns:
+                if not code_column(a):
+                    continue
+                left_codes = code_values(left, a)
+                if not left_codes:
+                    continue
+                for b in right.columns:
+                    if not code_column(b):
+                        continue
+                    right_codes = code_values(right, b)
+                    if not right_codes or left_codes[1] and right_codes[1]:
+                        continue
+                    overlap = left_codes[0] & right_codes[0]
+                    similarity = name_similarity(a, b)
+                    if (not overlap or len(overlap) / min(len(left_codes[0]), len(right_codes[0])) < 0.8
+                            or len(overlap) == 1 and similarity < 0.5):
+                        continue
+                    if left_codes[1]:
+                        scalar_file, scalar_column = right_name, b
+                        match_file, match_column = left_name, a
+                    else:
+                        scalar_file, scalar_column = left_name, a
+                        match_file, match_column = right_name, b
+                    found.append({'left_file': scalar_file, 'left_column': scalar_column,
+                                  'right_file': match_file, 'right_column': match_column,
+                                  'operator': 'contains' if left_codes[1] or right_codes[1] else 'equals',
+                                  'shared_values': sorted(overlap), 'name_similarity': round(similarity, 3),
+                                  'candidate': True})
+    return found
+
+
 def relation(left, right, left_columns, right_columns, bonus=0.0):
     left_counts = Counter(left.key(index, left_columns) for index in range(len(left.rows)))
     right_counts = Counter(right.key(index, right_columns) for index in range(len(right.rows)))
@@ -117,8 +169,12 @@ def relationships(tables):
             for a in left.columns:
                 if not key_column(a):
                     continue
+                if a.endswith('_code') and len(left.values[a]) <= 24:
+                    continue
                 for b in right.columns:
                     if not key_column(b):
+                        continue
+                    if b.endswith('_code') and len(right.values[b]) <= 24:
                         continue
                     values_a, values_b = left.values[a], right.values[b]
                     if not values_a or not values_b:
@@ -161,7 +217,7 @@ def positive(row):
     return len(values & POSITIVE) - len(values & NEGATIVE)
 
 
-def example_rows(tables, links):
+def example_rows(tables, links, checks):
     indexes = {}
 
     def matching(table_name, columns, key):
@@ -211,6 +267,26 @@ def example_rows(tables, links):
                 candidates = set.intersection(*groups.values())
                 if not candidates:
                     continue
+                for check in checks:
+                    if check['name_similarity'] < 0.5:
+                        continue
+                    left, right = check['left_file'], check['right_file']
+                    if target == left and right in selected:
+                        other = tables[right].key(selected[right], (check['right_column'],))[0]
+                        candidates = {number for number in candidates
+                                      if (tables[left].key(number, (check['left_column'],))[0] in other.split(';')
+                                          if check['operator'] == 'contains' else
+                                          tables[left].key(number, (check['left_column'],))[0] == other)}
+                    elif target == right and left in selected:
+                        other = tables[left].key(selected[left], (check['left_column'],))[0]
+                        candidates = {number for number in candidates
+                                      if (other in tables[right].key(number, (check['right_column'],))[0].split(';')
+                                          if check['operator'] == 'contains' else
+                                          other == tables[right].key(number, (check['right_column'],))[0])}
+                    if not candidates:
+                        break
+                if not candidates:
+                    continue
                 chosen = min(candidates, key=lambda number: (-positive(tables[target].rows[number]), number))
                 choices.append((len(groups), -len(candidates), target, chosen, reasons))
             if not choices:
@@ -256,8 +332,10 @@ def profile_folder(folder):
         raise ValueError(f'CSV 파일이 없습니다: {folder}')
     tables = {path.name: Table(path) for path in paths}
     links = relationships(tables)
+    checks = conditions(tables)
     return {'files': {name: table.output() for name, table in tables.items()},
-            'relationships': links, 'example': example_rows(tables, links)}
+            'relationships': links, 'conditions': checks,
+            'example': example_rows(tables, links, checks)}
 
 
 def main():

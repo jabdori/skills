@@ -25,7 +25,7 @@ PR 본문이나 사람 검토용 변경 설명을 요청받으면 [검토·PR �
 
 제출 전에는 [문서 지도](../_shared/personal-workflow.md#문서-지도)의 `docs/submission/notes.md`에 확인된 재료만 모아 사용자가 루트 제출 문서를 직접 쓰게 합니다. [코드 지도](../_shared/templates/code-map.md)는 `docs/explain/code-map.md`에 두고 `docs/requirements/evidence.md`와 해당 [ADR](../_shared/templates/adr.md)을 실제 코드·검사에 대조합니다. README가 별도 결정 제출 파일을 요구하면 그 파일은 지정 위치에 두고 ADR로 링크하며, 작업 문서를 루트 제출 문서에 섞지 않습니다.
 
-제출 전에는 [설명 카드의 코드 전체 지도](../_shared/templates/code-map.md#코드-전체-지도)에 제출 코드 모든 파일의 역할 한 줄·핵심 함수·주요 값·파일 간 입출력 연결을 실제 파일과 맞춰 적습니다.
+제출 전에는 [코드 지도](../_shared/templates/code-map.md#코드-전체-지도)에 [책임 폴더](../_shared/personal-workflow.md#코드-구조-기준)별 역할과 모든 제출 파일의 핵심 위치(파일:줄)·입출력 연결을 실제 코드와 맞춰 적습니다.
 
 제출 전 사용자에게 `읽기 지도` 5곳을 파일:줄로 줍니다: 알고리즘 핵심, 주요 값, 실패 시 상태 보존, 계산과 화면·저장의 경계, 권한 검사. 해당하지 않는 항목은 확인한 근거 위치와 함께 `해당 없음`으로 밝힙니다.
 
