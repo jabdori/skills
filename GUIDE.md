@@ -23,7 +23,7 @@
 ## 2. 설치와 시작 (과제 시작 후 3분)
 
 ```bash
-git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && mkdir -p ~/.agents/skills && cp -R /tmp/s/personal-skills/* ~/.agents/skills/
+git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && bash /tmp/s/install.sh
 ```
 
 1. 위 명령으로 스킬을 설치합니다. 이 가이드는 `/tmp/s/GUIDE.md`에 같이 내려옵니다.

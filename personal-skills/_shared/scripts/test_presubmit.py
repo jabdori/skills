@@ -253,15 +253,17 @@ class PresubmitTest(unittest.TestCase):
         (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
         (self.root / '인수점검표.md').write_text(
             '# 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n'
-            '|---|---|---|---|\n| 1 배정 | 검사 | 통과 | test_assignment |\n'
-            '| 2 상태 | 검토 시각 | 부분 | app.py:12 |\n'
-            '| 3 내보내기 | 스키마 검사 | 미확인 | 없음 |\n')
+            '|---|---|---|---|\n| 1 배정 | 검사 | 검사해서 통과함 | test_assignment |\n'
+            '| 2 상태 | 검토 시각 | 일부만 확인함 | app.py:12 |\n'
+            '| 3 내보내기 | 스키마 검사 | 아직 확인하지 않음 | 없음 |\n'
+            '| 4 로그인 | 요청 검사 | 아직 안 만듦 | README.md:80 |\n')
         self.run_git('add', 'EXPORT_SCHEMA.md', '인수점검표.md')
         self.run_git('commit', '-qm', 'docs: 인수 기준을 기록함')
         result = self.check_script('--contract', f'{sys.executable} -c "pass"')
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn('인수 점검표 부분: 2 상태', result.stdout)
-        self.assertIn('인수 점검표 미확인: 3 내보내기', result.stdout)
+        self.assertIn('인수 점검표 일부만 확인함: 2 상태', result.stdout)
+        self.assertIn('인수 점검표 아직 확인하지 않음: 3 내보내기', result.stdout)
+        self.assertIn('인수 점검표 아직 안 만듦: 4 로그인', result.stdout)
         self.assertNotIn('계약 검사기 미실행', result.stdout)
 
     def test_contract_failure_warns_and_embedded_checklist_passes(self):

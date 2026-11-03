@@ -211,9 +211,10 @@ def acceptance_warnings(root, path, required):
         if len(cells) < 4 or cells[0] == '요구사항' or re.fullmatch(r'[-: ]+', cells[0]):
             continue
         rows += 1
-        if not cells[0] or cells[2] not in {'통과', '부분', '미확인'}:
+        if not cells[0] or cells[2] not in {'통과', '부분', '미확인', '검사해서 통과함',
+                                            '일부만 확인함', '아직 확인하지 않음', '아직 안 만듦'}:
             warnings.add(f'인수 점검표 요구사항·상태 확인 필요: {cells[0] or "빈 행"}')
-        elif cells[2] != '통과':
+        elif cells[2] not in {'통과', '검사해서 통과함'}:
             warnings.add(f'인수 점검표 {cells[2]}: {cells[0]}')
     if not rows:
         warnings.add(f'인수 점검표 요구사항 없음: {path}')
