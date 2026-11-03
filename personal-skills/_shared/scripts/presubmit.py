@@ -220,6 +220,21 @@ def acceptance_warnings(root, path, required):
     return warnings
 
 
+def mixed_document_warnings(root):
+    # 작업 문서(근거표·인수 점검표)는 docs/에 두고 제출 문서에는 링크만 겁니다.
+    markers = (('## 인수 점검표', '인수 점검표'), ('| 요구·예외 | 근거 출처', '요구 근거표'))
+    warnings = set()
+    for name in ('HOW_TO_RUN.md', 'AI_COLLABORATION.md'):
+        path = root / name
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding='utf-8', errors='replace')
+        for marker, label in markers:
+            if marker in text:
+                warnings.add(f'{name}에 {label}가 섞임: docs/로 옮기고 링크만 남기세요(README가 위치를 명시한 경우는 무시).')
+    return warnings
+
+
 def run_test(root, command, label='테스트'):
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
     print(f'{label}: {command}')
@@ -270,7 +285,7 @@ def main():
     if checked is not None:
         print(f'결정 문서 대조: 코드 {checked}개')
     warnings = (file_warnings(root, changed) | document_issues | protected_issues | commit_issues
-                | acceptance_warnings(root, args.acceptance, schema_present))
+                | acceptance_warnings(root, args.acceptance, schema_present) | mixed_document_warnings(root))
     if schema_present and not args.contract:
         warnings.add('계약 검사기 미실행: --contract 명령을 지정하세요.')
     if contract_failed:

@@ -230,6 +230,16 @@ class PresubmitTest(unittest.TestCase):
         self.assertIn('계약 검사기 미실행', result.stdout)
         self.assertFalse((self.root / '인수점검표.md').exists())
 
+    def test_working_tables_mixed_into_submission_doc_warn(self):
+        (self.root / 'HOW_TO_RUN.md').write_text('# HOW_TO_RUN\n\n## 인수 점검표\n| 요구사항 | 확인 방법 | 상태 | 근거 |\n')
+        self.run_git('add', 'HOW_TO_RUN.md')
+        self.run_git('commit', '-qm', 'docs: 실행 안내를 추가함')
+        result = self.check_script()
+        self.assertIn('HOW_TO_RUN.md에 인수 점검표가 섞임', result.stdout)
+        (self.root / 'HOW_TO_RUN.md').write_text('# HOW_TO_RUN\n\n인수 점검표: [docs/인수점검표.md](docs/인수점검표.md)\n')
+        self.run_git('commit', '-qam', 'docs: 점검표를 링크로 바꿈')
+        self.assertNotIn('섞임', self.check_script().stdout)
+
     def test_acceptance_partial_and_unconfirmed_warn(self):
         (self.root / 'EXPORT_SCHEMA.md').write_text('# 내보내기 형식\n')
         (self.root / '인수점검표.md').write_text(
