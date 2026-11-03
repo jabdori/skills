@@ -35,7 +35,7 @@ mkdir -p ~/.agents/skills && cp -R personal-skills/* ~/.agents/skills/
 
 | 상황 | 사용하는 양식·행동 |
 |---|---|
-| “과제를 처음 읽어줘” | [문서 지도](_shared/personal-workflow.md#문서-지도)에 따라 `docs/task/overview.md`를 만들고, [데이터 지도](_shared/templates/data-map.md)로 실제 CSV의 모든 열을 설명 |
+| “과제를 처음 읽어줘” | [문서 지도](_shared/personal-workflow.md#문서-지도)에 따라 `docs/task/overview.md`를 만들고, [데이터 지도](_shared/templates/data-map.md)로 관계도와 실제 한 건 따라가기부터 보여 주고 모든 열을 설명 |
 | “업무 요구가 있는 과제를 진행해줘” | [문서 지도](_shared/personal-workflow.md#문서-지도)의 `docs/requirements/evidence.md`에 [요구 근거표](_shared/templates/requirements-evidence.md)를 시작해 출처·구현·검증·상태를 갱신 |
 | “깊게 조사하거나 만든 화면을 확인해줘” | 심층 조사에만 [조사 근거표](_shared/templates/research-evidence.md)를 쓰고, 필요한 원문·자기 화면 확인에는 [agent-browser 참고](_shared/agent-browser.md) |
 | “이 기능을 명세와 작업으로 정리해줘” | [명세·작업 양식](_shared/spec-and-tickets.md) |

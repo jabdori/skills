@@ -174,7 +174,7 @@ git clone --depth 1 https://github.com/jabdori/skills.git /tmp/s && bash /tmp/s/
 | 요구 근거표 | `templates/requirements-evidence.md` | 담당자 답을 받기 시작할 때 | `요구·예외 / 근거(누가·언제·요지) / 구현 위치 / 확인 테스트 / 상태 / 담당자 간 조율` 한 표. 답을 줄 때마다 Codex가 갱신 |
 | 결정 기록 | `templates/adr.md` | 결과를 바꾸는 결정을 할 때 | `docs/adr/NNNN-english-slug.md`에 결정 하나씩, `docs/adr/README.md`에 번호·한 줄·상태 |
 | 설명 카드 | `templates/code-map.md` | 제출 10분 전 | 분기마다 `무엇을 하나 / 파일:줄 / 확인한 테스트 / 확인 안 한 것`. **내가 직접 읽는 용도** |
-| 데이터 지도 | `templates/data-map.md` | 과제 시작 직후 | CSV마다 한 행·모든 열의 뜻, 값 종류·개수, 파일 관계를 `docs/task/data-map.md`에 기록 |
+| 데이터 지도 | `templates/data-map.md` | 과제 시작 직후 | 관계도와 실제 한 건을 먼저 따라가고, 파일·열 설명과 값 통계는 뒤에 기록 |
 | 쉬운 설명 카드 | `templates/concept-card.md` | 어려운 알고리즘 | `docs/explain/concepts/`에 실제 데이터 3줄·방법별 결과·비유와 SVG 한 장 |
 | 제출 전 점검 | `scripts/presubmit.py` | 확정 직전 | 최초 커밋부터의 전체 변경, 생성물(`__pycache__`·`.pyc`·`.env`·로그·큰 파일), 결정 문서에 언급 없는 코드 파일, `--test` 실행 결과 |
 
