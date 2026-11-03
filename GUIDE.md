@@ -253,7 +253,7 @@ python3 ~/.agents/skills/_shared/scripts/presubmit.py --decisions docs/결정.md
 
 ## 12. 연습 루틴 (로컬 연습 환경)
 
-- 시작: `./cofa.sh start <과제ID> --minutes N --fresh` → `http://localhost:7000`. 과제: `order-service`(기존 수정, 담당자 2명), `interview-coach`(신규 구축), `wafer-defect-report`(데이터 분석), `equipment-alarm-handover`(업무 화면, 담당자 2명), `review-insight`(커머스 데이터).
+- 시작: `./cofa.sh start` → `http://localhost:7300`(AirPlay가 쓰는 7000을 피함). 선택 화면에서 실전급 과제 50개 중 하나를 고르면 과제마다 새 샌드박스가 만들어집니다. 목록과 추천 순서는 `연습환경/tasks/INDEX.md`.
 - 끝나면 리포트의 **판정 근거**와 **내 답 vs 모범 답안**을 대조합니다. 점수보다 "다음 연습 행동 3가지"를 다음 과제의 목표로 삼습니다.
 - 매 연습 뒤 셀프 점검:
   - [ ] 담당자 답을 빠짐없이 옮겼나
